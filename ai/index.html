@@ -170,7 +170,7 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
 @media (max-width:960px){.out{position:static}}
 .out-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px;min-width:0}
 .out-card .label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
-.slip{background:var(--slip);border:1px dashed var(--line);border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:46vh;overflow:auto;margin:0;font-family:var(--body)}
+.slip{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;background:var(--slip);border:1px dashed var(--line);border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:46vh;overflow:auto;margin:0;font-family:var(--body)}
 .slip mark{background:var(--accent-soft);color:var(--ink);border-radius:3px;padding:0 2px}
 .status{font-size:13.5px;border-radius:8px;padding:8px 12px}
 .status.empty{background:var(--sunk);color:var(--muted)}
@@ -417,6 +417,12 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
       <li><label for="pledge-5"><input type="checkbox" id="pledge-5" data-pledge="5"><span>엔딩 크레딧에 내가 활용한 AI 도구와 AI로 생성한 이미지 목록을 적습니다.</span></label></li>
     </ul>
   </header>
+  <div class="modal" id="paste-modal" hidden>
+    <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="paste-title" aria-describedby="paste-desc">
+      <div class="modal-head"><h2 id="paste-title">붙여넣기는 할 수 없습니다</h2><button class="modal-x" type="button" id="paste-close" aria-label="닫기">×</button></div>
+      <p id="paste-desc">묘사는 직접 쓰세요.</p>
+    </div>
+  </div>
   <div class="modal" id="share-modal" hidden>
     <div class="modal-box wide" role="dialog" aria-modal="true" aria-labelledby="share-title">
       <div class="modal-head"><h2 id="share-title">AI와의 대화 내역 제출하는 법</h2><button class="modal-x" type="button" id="share-close" aria-label="닫기">×</button></div>
@@ -1115,7 +1121,12 @@ $("#copy").addEventListener("click",()=>{
     store.set("made",state.made);update();
     toast(state.tab==="character"?"복사했습니다. 새 대화를 열어 붙여 넣으세요. 이 인물은 끝까지 그 대화에서 만듭니다.":"복사했습니다. 새 대화를 열어 붙여 넣으세요. 한 장소에서 생성할 이미지는 한 대화창 안에서 만듭니다.");
   };
-  const fallback=()=>{const r=document.createRange();r.selectNodeContents($("#slip"));const s=getSelection();s.removeAllRanges();s.addRange(r);done();toast("프롬프트를 선택해 두었습니다. 복사(Ctrl+C 또는 길게 눌러 복사)한 뒤 붙여 넣으세요.")};
+  const fallback=()=>{
+    const ta=document.createElement("textarea");ta.value=text;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0;pointer-events:none";
+    document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,text.length);
+    let ok=false;copyAllowed=true;try{ok=document.execCommand("copy")}catch(e){}copyAllowed=false;ta.remove();
+    if(ok)done();else toast("복사하지 못했습니다. '프롬프트 복사' 버튼을 다시 눌러 보세요.");
+  };
   try{navigator.clipboard.writeText(text).then(done,fallback)}catch(e){fallback()}
 });
 
@@ -1139,20 +1150,30 @@ document.querySelector(".tabs").addEventListener("keydown",e=>{if(e.key==="Arrow
 /* 붙여넣기 금지: 묘사 칸은 직접 쓰기 */
 const isField=el=>el&&(el.tagName==="TEXTAREA"||(el.tagName==="INPUT"&&/^(text|search|)$/.test(el.type||"")));
 const NO_PASTE="붙여넣기는 할 수 없습니다. 묘사는 직접 쓰세요.";
+/* 붙여넣기 안내는 화면 가운데 팝업으로, X를 눌러야 닫힘 */
+const pasteModal=$("#paste-modal");let pasteFrom=null;
+function noPaste(el){if(el&&el.blur){pasteFrom=el;el.blur()}pasteModal.hidden=false;$("#paste-close").focus()}
+$("#paste-close").addEventListener("click",()=>{pasteModal.hidden=true;if(pasteFrom&&pasteFrom.isConnected)pasteFrom.focus({preventScroll:true});pasteFrom=null});
 const prevVal=new WeakMap();
 document.addEventListener("focusin",e=>{if(isField(e.target))prevVal.set(e.target,e.target.value)},true);
-["paste","drop"].forEach(ev=>document.addEventListener(ev,e=>{if(isField(e.target)){e.preventDefault();e.stopImmediatePropagation();toast(NO_PASTE)}},true));
-document.addEventListener("beforeinput",e=>{if(isField(e.target)&&/^insertFrom(Paste|Drop|Yank|PasteAsQuotation)/.test(e.inputType||"")){e.preventDefault();e.stopImmediatePropagation();toast(NO_PASTE)}},true);
+["paste","drop"].forEach(ev=>document.addEventListener(ev,e=>{if(isField(e.target)){e.preventDefault();e.stopImmediatePropagation();noPaste(e.target)}},true));
+document.addEventListener("beforeinput",e=>{if(isField(e.target)&&/^insertFrom(Paste|Drop|Yank|PasteAsQuotation)/.test(e.inputType||"")){e.preventDefault();e.stopImmediatePropagation();noPaste(e.target)}},true);
 document.addEventListener("input",e=>{
   const el=e.target;if(!isField(el))return;
   const before=prevVal.has(el)?prevVal.get(el):"";
   /* 모바일 키보드의 클립보드 버튼처럼 한 번에 긴 글이 들어오면 되돌리기 */
   if(!e.isComposing&&e.inputType!=="insertCompositionText"&&el.value.length-before.length>15){
-    el.value=before;e.stopImmediatePropagation();toast(NO_PASTE);return;
+    el.value=before;e.stopImmediatePropagation();noPaste(el);return;
   }
   prevVal.set(el,el.value);
 },true);
 
+/* 프롬프트 미리보기는 긁어서 복사할 수 없음: '프롬프트 복사' 버튼으로만 복사 */
+let copyAllowed=false;
+const slipEl=$("#slip");
+const inSlip=sel=>{try{return !!sel&&sel.rangeCount>0&&(sel.containsNode(slipEl,true)||slipEl.contains(sel.anchorNode)||slipEl.contains(sel.focusNode))}catch(e){return false}};
+["copy","cut"].forEach(ev=>document.addEventListener(ev,e=>{if(copyAllowed)return;if(slipEl.contains(e.target)||inSlip(getSelection())){e.preventDefault();toast("미리보기는 복사할 수 없습니다. 칸을 다 채운 뒤 '프롬프트 복사' 버튼을 누르세요.")}},true));
+["contextmenu","dragstart","selectstart"].forEach(ev=>slipEl.addEventListener(ev,e=>e.preventDefault()));
 /* 휴대폰 예시: 단계별로 누르는 장면을 차례대로 재생 */
 function playPhone(d){
   const gen=(d._gen=(d._gen||0)+1);
