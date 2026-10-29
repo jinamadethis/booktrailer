@@ -828,7 +828,7 @@ $("#ch-confirm-no").addEventListener("click",()=>{$("#ch-confirm").hidden=true;$
 $("#ch-confirm-yes").addEventListener("click",()=>{$("#ch-confirm").hidden=true;fillCh({kind:"사람",kinddesc:"",name:"",age:"",look:"",outfit:"",person:"",pose:"",key:""});toast("칸을 비웠습니다. 새로운 인물은 새로운 대화창에서 프롬프트를 입력하세요.")});
 
 /* 장소 카메라 각도 예시 그림: 집 한 채와 나무 한 그루를 각도별로 */
-const PLACE_ANGLE_NOTE={"아이 레벨":"눈높이에서 봄. 장소가 보이는 그대로 나오고, 인물을 올리기 쉬움","하이 앵글":"위에서 내려다봄. 장소의 배치가 한눈에 보이고, 작고 쓸쓸해 보임","로 앵글":"아래에서 올려다봄. 건물·나무가 높고 웅장해 보이고, 하늘이 넓게 보임"};
+const PLACE_ANGLE_NOTE={"아이 레벨":"눈높이에서 봄. 장소가 보이는 그대로 나오고, 인물을 올리기 쉬움","하이 앵글":"위에서 내려다봄. 장소의 배치가 한눈에 보이고, 작고 쓸쓸해 보임","로 앵글":"아래에서 올려다봄. 건물·나무가 위로 갈수록 좁아지며 높고 웅장해 보임"};
 function placeAngleSvg(a){
   let g="";
   if(a==="하이 앵글"){
@@ -837,9 +837,10 @@ function placeAngleSvg(a){
     g+=`<path class="ln face" d="M54 52H102L98 64H58Z"/><path class="ln" d="M75 64V58H81V64"/>`;
     g+=`<circle class="ln face" cx="126" cy="50" r="13"/><path class="ln thin" d="M120 46Q126 41 132 46"/>`;
   }else if(a==="로 앵글"){
-    g+=`<path class="ln thin" d="M0 84H160"/>`;
-    g+=`<path class="ln face" d="M46 84L54 40H94L102 84Z"/><path class="ln" d="M50 40L74 14L98 40Z"/><path class="ln" d="M68 84V66H80V84"/>`;
-    g+=`<path class="ln" d="M122 84L124 40M130 84L128 40"/><circle class="ln face" cx="126" cy="30" r="16"/>`;
+    g+=`<path class="ln thin" d="M8 20q4-7 11-3q5-6 11 0q7-1 6 6H8Z"/><path class="ln thin" d="M100 12q3-5 8-2q4-4 8 0q5 0 4 4H100Z"/>`;
+    g+=`<path class="ln face" d="M30 92L48 34H88L106 92Z"/><path class="ln" d="M42 34H94L68 8Z"/><path class="ln thin" d="M46 38H90"/>`;
+    g+=`<path class="ln" d="M57 50H79L80 62H56Z"/><path class="ln" d="M58 92L61 74H75L78 92"/>`;
+    g+=`<path class="ln face" d="M120 92L127 42H133L140 92Z"/><circle class="ln face" cx="130" cy="28" r="19"/>`;
   }else{
     g+=`<path class="ln thin" d="M0 70H160"/>`;
     g+=`<path class="ln face" d="M52 70V44H96V70Z"/><path class="ln" d="M48 44L74 26L100 44Z"/><path class="ln" d="M70 70V58H78V70"/>`;
