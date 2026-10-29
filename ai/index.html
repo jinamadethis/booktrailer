@@ -837,10 +837,17 @@ function placeAngleSvg(a){
     g+=`<path class="ln face" d="M54 52H102L98 64H58Z"/><path class="ln" d="M75 64V58H81V64"/>`;
     g+=`<circle class="ln face" cx="126" cy="50" r="13"/><path class="ln thin" d="M120 46Q126 41 132 46"/>`;
   }else if(a==="로 앵글"){
-    g+=`<path class="ln thin" d="M8 20q4-7 11-3q5-6 11 0q7-1 6 6H8Z"/><path class="ln thin" d="M100 12q3-5 8-2q4-4 8 0q5 0 4 4H100Z"/>`;
-    g+=`<path class="ln face" d="M30 92L48 34H88L106 92Z"/><path class="ln" d="M42 34H94L68 8Z"/><path class="ln thin" d="M46 38H90"/>`;
-    g+=`<path class="ln" d="M57 50H79L80 62H56Z"/><path class="ln" d="M58 92L61 74H75L78 92"/>`;
-    g+=`<path class="ln face" d="M120 92L127 42H133L140 92Z"/><circle class="ln face" cx="130" cy="28" r="19"/>`;
+    /* 땅바닥 가까이에서 올려다봄: 세로선이 모두 화면 위쪽 한 점(소실점)으로 모이고, 가운데로 하늘이 보임 */
+    const B=84, V=-120, P=(x,y)=>(x+(80-x)*(B-y)/(B-V)).toFixed(1), Q=(x,y)=>P(x,y)+" "+y;
+    g+=`<path class="ln thin" d="M0 83Q80 78 160 83"/><path class="ln thin" d="M10 89l7-2M34 88l6-2M60 90l7-2M100 89l7-2M126 87l6-2M150 89l6-2"/>`;
+    g+=`<path class="ln thin" d="M70 14q2-5 7-3q3-5 8-1q5 0 4 4H70Z"/>`;
+    [[100,3],[124,5],[154,8]].forEach(([x,w])=>{g+=`<path class="ln face" d="M${x-w} ${B}L${Q(x-w,10)}L${Q(x+w,10)}L${x+w} ${B}Z"/>`});
+    g+=`<path class="ln face" d="M80 -2Q84 8 90 12q4 8 11 4q5 9 13 3q6 9 14 2q6 8 14 1q5 6 10 0q4 6 12 2V-2Z"/>`;
+    const L=-8,R=60,T=22;
+    g+=`<path class="ln face" d="M${L} ${B}L${Q(L,T)}L${Q(R,T)}L${R} ${B}Z"/>`;
+    g+=`<path class="ln face" d="M${(+P(L,T)-4).toFixed(1)} ${T}L${(+P(R,T)+4).toFixed(1)} ${T}L${P((L+R)/2,2)} 2Z"/>`;
+    [[4,16],[34,46]].forEach(([a,b])=>{[[30,40],[50,60]].forEach(([t,u])=>{g+=`<path class="ln thin" d="M${Q(a,u)}L${Q(b,u)}L${Q(b,t)}L${Q(a,t)}Z"/>`})});
+    g+=`<path class="ln" d="M20 ${B}L${Q(20,68)}L${Q(32,68)}L32 ${B}"/>`;
   }else{
     g+=`<path class="ln thin" d="M0 70H160"/>`;
     g+=`<path class="ln face" d="M52 70V44H96V70Z"/><path class="ln" d="M48 44L74 26L100 44Z"/><path class="ln" d="M70 70V58H78V70"/>`;
@@ -849,7 +856,7 @@ function placeAngleSvg(a){
   return `<svg viewBox="0 0 160 90">${g}</svg>`;
 }
 function placeSideSvg(h){
-  const Q={"하이 앵글":{x:36,y:12,r:28,tx:104,ty:50},"아이 레벨":{x:34,y:52,r:0,tx:100,ty:52},"로 앵글":{x:36,y:64,r:-28,tx:104,ty:34}}[h]||{x:34,y:52,r:0,tx:100,ty:52};
+  const Q={"하이 앵글":{x:36,y:12,r:28,tx:104,ty:50},"아이 레벨":{x:34,y:52,r:0,tx:100,ty:52},"로 앵글":{x:30,y:66,r:-40,tx:116,ty:28}}[h]||{x:34,y:52,r:0,tx:100,ty:52};
   const phone=`<g transform="translate(${Q.x} ${Q.y}) rotate(${Q.r})"><rect class="ln" x="-4" y="-9" width="8" height="18" rx="2"/><circle class="fill-acc" cx="4" cy="0" r="2"/></g>`;
   return `<svg viewBox="0 0 160 80"><path class="ln thin" d="M4 74H156"/><path class="ln" d="M104 74V44H144V74"/><path class="ln" d="M100 44L124 26L148 44"/><path class="ln acc dash" d="M${Q.x+5} ${Q.y}L${Q.tx} ${Q.ty}"/>${phone}</svg>`;
 }
