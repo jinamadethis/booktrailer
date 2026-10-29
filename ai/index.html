@@ -563,7 +563,7 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
             <div class="ox-row"><div class="o"><b>O</b>사람이 있던 흔적 (빈 의자, 놓인 가방)</div><div class="x"><b>X</b>사람, 뒷모습, 그림자</div></div>
             <div class="ox-row"><div class="o"><b>O</b>글자는 편집에서 자막으로</div><div class="x"><b>X</b>간판·칠판 글씨를 그림 속에</div></div>
             <div class="ox-row"><div class="o"><b>O</b>시간과 날씨로 쓰기 ("해 질 무렵")</div><div class="x"><b>X</b>팔레트에 없는 색 쓰기 ("붉은 노을")</div></div>
-            <div class="ox-row"><div class="o"><b>O</b>인물을 올릴 배경은 아이 레벨</div><div class="x"><b>X</b>하이·로 앵글 배경에 정면 인물 올리기</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>배경에 인물이 위치한다면 아이 레벨</div><div class="x"><b>X</b>하이·로 앵글 배경에 정면 인물 올리기</div></div>
           </div>
         </section>
       </div>
@@ -896,7 +896,7 @@ function placeExtras(d,p){
   const on={왼쪽:[0],가운데:[1],오른쪽:[2],양쪽:[0,2],없음:[]}[p.spot]||[];
   d.querySelectorAll("[data-mini] i").forEach((el,i)=>el.classList.toggle("on",on.includes(i)));
   const note=d.querySelector("[data-note]");
-  if(p.spot!=="없음"&&p.angle!=="아이 레벨"){note.hidden=false;note.textContent="인물을 올릴 배경은 아이 레벨이 가장 자연스럽습니다. "+josa(p.angle,"을","를")+" 쓰려면 인물 없이 배경만 쓰는 컷으로 생각해 보세요."}
+  if(p.spot!=="없음"&&p.angle!=="아이 레벨"){note.hidden=false;note.textContent="배경에 인물이 위치한다면 아이 레벨이 가장 자연스럽습니다. "+josa(p.angle,"을","를")+" 쓰려면 인물 없이 배경만 쓰는 컷으로 생각해 보세요."}
   else if(p.spot==="없음"){note.hidden=false;note.textContent="인물 자리 없음: 인물 없이 배경만 쓰는 컷(장소 소개 등)으로 만듭니다."}
   else note.hidden=true;
 }
