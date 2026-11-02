@@ -1127,8 +1127,8 @@ Prompt: (반드시 영어로 작성)
 }
 
 const NEXT={
- character:["새 대화를 열어 붙여 넣고 보내기. 이 인물은 끝까지 이 대화에서 만들기 (이미지를 만들 수 있는 대화형 AI)","다음 인물은 칸을 비우고 새로 써서 새 대화에서 따로 요청하기. 앞의 대화도 지우지 않기","대화는 지우지 않기. 이미지를 다 만들면 그 대화의 공유 링크를 만들어 모아 두기 (영상과 함께 제출). 엔딩 크레딧에 활용한 AI 도구와 AI로 생성한 이미지 목록 적기"],
- background:["새 대화를 열어 붙여 넣고 보내기. 한 장소에서 생성할 이미지는 한 대화창 안에서 만들기 (이미지를 만들 수 있는 대화형 AI)","다음 장소는 칸을 비우고 새로 써서 새 대화에서 따로 요청하기. 앞의 대화도 지우지 않기","대화는 지우지 않기. 이미지를 다 만들면 그 대화의 공유 링크를 만들어 모아 두기 (영상과 함께 제출). 엔딩 크레딧에 활용한 AI 도구와 AI로 생성한 이미지 목록 적기"]
+ character:["새 대화를 열어 붙여 넣고 보내기. 한 인물은 끝까지 한 대화에서 만들기 (이미지를 만들 수 있는 대화형 AI)","다음 인물은 칸을 비우고 새로 써서 새 대화에서 따로 요청하기","대화는 지우지 않기. 이미지를 다 만들면 그 대화의 공유 링크를 만들어 모아 두기 (영상과 함께 제출). 엔딩 크레딧에 활용한 AI 도구와 AI로 생성한 이미지 목록 적기"],
+ background:["새 대화를 열어 붙여 넣고 보내기. 한 장소에서 생성할 이미지는 한 대화창 안에서 만들기 (이미지를 만들 수 있는 대화형 AI)","다음 장소는 칸을 비우고 새로 써서 새 대화에서 따로 요청하기","대화는 지우지 않기. 이미지를 다 만들면 그 대화의 공유 링크를 만들어 모아 두기 (영상과 함께 제출). 엔딩 크레딧에 활용한 AI 도구와 AI로 생성한 이미지 목록 적기"]
 };
 const CH_LABELS={kinddesc:"사는 세계·환경",name:"인물 이름",age:"나이·성별",look:"생김새",outfit:"옷차림",person:"성격",pose:"표정과 자세",key:"꼭 보여야 할 소품"};
 
@@ -1204,7 +1204,7 @@ $("#copy").addEventListener("click",()=>{
     if(state.tab==="character") state.made.push({t:"인물",name:val(state.ch.name)});
     else state.places.forEach(p=>state.made.push({t:"배경",name:val(p.place)}));
     lastCopied=text;store.set("made",state.made);update();
-    toast(state.tab==="character"?"복사했습니다. 새 대화를 열어 붙여 넣으세요. 이 인물은 끝까지 그 대화에서 만듭니다.":"복사했습니다. 새 대화를 열어 붙여 넣으세요. 한 장소에서 생성할 이미지는 한 대화창 안에서 만듭니다.");
+    toast(state.tab==="character"?"복사했습니다. 새 대화를 열어 붙여 넣으세요. 한 인물은 끝까지 한 대화에서 만듭니다.":"복사했습니다. 새 대화를 열어 붙여 넣으세요. 한 장소에서 생성할 이미지는 한 대화창 안에서 만듭니다.");
   };
   const fallback=()=>{
     const ta=document.createElement("textarea");ta.value=text;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0;pointer-events:none";
