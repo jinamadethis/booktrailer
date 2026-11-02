@@ -167,6 +167,12 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
 .btn:hover{border-color:var(--ink)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-size:16px;padding:12px 18px;width:100%}
 .btn.primary:disabled{opacity:.45;cursor:not-allowed}
+/* 모든 칸을 채우면 복사 버튼이 반짝임 */
+#copy.ready{position:relative;overflow:hidden;animation:copyPulse 1.6s ease-in-out infinite}
+#copy.ready::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:copyShine 1.6s ease-in-out infinite;pointer-events:none}
+@keyframes copyPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent);filter:none}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 35%,transparent),0 0 26px 6px color-mix(in srgb,var(--accent) 55%,transparent);filter:brightness(1.15)}}
+@keyframes copyShine{0%{left:-60%}60%,100%{left:130%}}
+@media (prefers-reduced-motion:reduce){#copy.ready{animation:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent)}#copy.ready::after{display:none}}
 .btn.small{padding:5px 10px;font-size:13px}
 .btn.ghost{background:transparent}
 .row-btns{display:flex;flex-wrap:wrap;gap:8px}
@@ -613,9 +619,8 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
           <div class="ox">
             <div class="ox-row"><div class="o"><b>O</b>책에 없는 장소 모습은 책 내용에 어울리게 상상해서 쓰기</div><div class="x"><b>X</b>책 내용과 어긋나는 장소 지어내기</div></div>
             <div class="ox-row"><div class="o"><b>O</b>장소 전체가 보이는 그림</div><div class="x"><b>X</b>사물 하나를 크게 → 직접 찍는 컷으로</div></div>
-            <div class="ox-row"><div class="o"><b>O</b>사람이 있던 흔적 (빈 의자, 놓인 가방)</div><div class="x"><b>X</b>사람, 뒷모습, 그림자</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>사람이 있던 흔적 (빈 의자, 놓인 가방)</div><div class="x"><b>X</b>배경에 인물이 들어가도록 묘사하기</div></div>
             <div class="ox-row"><div class="o"><b>O</b>글자는 편집에서 자막으로</div><div class="x"><b>X</b>간판·칠판 글씨를 그림 속에</div></div>
-            <div class="ox-row"><div class="o"><b>O</b>시간과 날씨로 쓰기 ("해 질 무렵")</div><div class="x"><b>X</b>팔레트에 없는 색 쓰기 ("붉은 노을")</div></div>
             <div class="ox-row"><div class="o"><b>O</b>배경에 인물이 위치한다면 아이 레벨</div><div class="x"><b>X</b>하이·로 앵글 배경에 정면 인물 올리기</div></div>
           </div>
         </section>
@@ -1140,6 +1145,7 @@ function check(){
   return {ok:true,msg:empty.length?"비어 있는 칸은 AI가 채우고 'AI가 채운 것'에 알려 줍니다.":"모든 칸을 채웠습니다."};
 }
 
+var lastCopied=null;
 function update(){
   const mm=mismatch();
   document.querySelectorAll(".lock-kind").forEach(el=>el.textContent=state.tab==="character"?"인물":"배경");
@@ -1158,6 +1164,7 @@ function update(){
   const st=$("#status");st.className="status "+(c.ok?"empty":"bad");st.innerHTML=c.msg;
   $("#out-warn").hidden=!mm;
   $("#copy").disabled=!c.ok||mm;
+  $("#copy").classList.toggle("ready",c.ok&&!mm&&c.msg==="모든 칸을 채웠습니다."&&text!==lastCopied);
   $("#f-ch-name").classList.toggle("missing",isCh&&!val(state.ch.name)&&state.preset!=null);
   $("#next").innerHTML=NEXT[state.tab].map(s=>`<li>${esc(s)}</li>`).join("");
 
@@ -1189,7 +1196,7 @@ $("#copy").addEventListener("click",()=>{
     if(state.locked==null){state.locked=state.preset;store.set("locks",state.locks)}
     if(state.tab==="character") state.made.push({t:"인물",name:val(state.ch.name)});
     else state.places.forEach(p=>state.made.push({t:"배경",name:val(p.place)}));
-    store.set("made",state.made);update();
+    lastCopied=text;store.set("made",state.made);update();
     toast(state.tab==="character"?"복사했습니다. 새 대화를 열어 붙여 넣으세요. 이 인물은 끝까지 그 대화에서 만듭니다.":"복사했습니다. 새 대화를 열어 붙여 넣으세요. 한 장소에서 생성할 이미지는 한 대화창 안에서 만듭니다.");
   };
   const fallback=()=>{
