@@ -129,7 +129,7 @@ fieldset .hint{font-size:12.5px;color:var(--muted)}
 .f textarea{min-height:64px;resize:vertical}
 .f input::placeholder,.f textarea::placeholder{color:var(--muted);opacity:.75}
 .f .hint{font-size:12.5px;color:var(--muted)}
-.f.missing input{border-color:var(--no)}
+.f.missing input,.f.missing textarea{border-color:var(--no);border-width:2px}
 fieldset{border:0;margin:0;padding:0;display:grid;gap:6px;min-width:0}
 fieldset > legend.legend{padding:0;margin-bottom:8px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
@@ -534,7 +534,7 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
         <section class="step screen" data-screen="4" aria-labelledby="h-ch">
           <div class="step-head">
             <span class="step-no">2단계</span><h2 id="h-ch">인물 묘사하기</h2>
-            <p class="step-sub">책을 읽고 떠올린 모습을 직접 씁니다. <strong>책에 생김새 묘사가 없으면 책 내용에 어울리게 상상해서 써도 됩니다.</strong> 한 번에 한 명만 만듭니다.</p>
+            <p class="step-sub">책을 읽고 떠올린 모습을 직접 씁니다. <strong>책에 생김새 묘사가 없으면 책 내용에 어울리게 상상해서 써도 됩니다.</strong> 한 번에 한 명만 만듭니다. <b>모든 칸이 필수</b>입니다.</p>
             <p class="note"><b>한 인물은 한 대화창에서</b> 확인·고치기·다시 만들기까지 끝냅니다.<br><b>새로운 인물은 새 대화</b>를 열어 요청합니다.<br>같은 대화에서 이어 만들면 먼저 생성한 그림의 영향을 받기 때문에 의도한 대로 결과물이 나오지 않을 수 있습니다.</p>
           </div>
           <div class="row-btns">
@@ -596,7 +596,7 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
         <section class="step screen" data-screen="4" aria-labelledby="h-bg">
           <div class="step-head">
             <span class="step-no">2단계</span><h2 id="h-bg">장소 묘사하기</h2>
-            <p class="step-sub">책을 참고하여 책 속 장소를 직접 묘사합니다. <strong>책에 장소 묘사가 없으면 책 내용에 어울리게 상상해서 써도 됩니다.</strong> 한 번에 장소 한 곳만 만듭니다.</p>
+            <p class="step-sub">책을 참고하여 책 속 장소를 직접 묘사합니다. <strong>책에 장소 묘사가 없으면 책 내용에 어울리게 상상해서 써도 됩니다.</strong> 한 번에 장소 한 곳만 만듭니다. <b>모든 칸이 필수</b>입니다.</p>
             <p class="note"><b>한 장소는 한 대화창에서</b> 확인·고치기·다시 만들기까지 끝냅니다.<br>장소가 여러 곳일 경우, 기존 대화창에서 계속 작업하지 않고 <b>새로운 대화창</b>을 열어 새로운 프롬프트를 붙여 넣습니다.<br>같은 대화에서 이어 만들면 먼저 생성한 그림의 영향을 받기 때문에 의도한 대로 결과물이 나오지 않을 수 있습니다.</p>
           </div>
           <div class="row-btns">
@@ -1130,19 +1130,25 @@ const NEXT={
  character:["새 대화를 열어 붙여 넣고 보내기. 이 인물은 끝까지 이 대화에서 만들기 (이미지를 만들 수 있는 대화형 AI)","다음 인물은 칸을 비우고 새로 써서 새 대화에서 따로 요청하기. 앞의 대화도 지우지 않기","대화는 지우지 않기. 이미지를 다 만들면 그 대화의 공유 링크를 만들어 모아 두기 (영상과 함께 제출). 엔딩 크레딧에 활용한 AI 도구와 AI로 생성한 이미지 목록 적기"],
  background:["새 대화를 열어 붙여 넣고 보내기. 한 장소에서 생성할 이미지는 한 대화창 안에서 만들기 (이미지를 만들 수 있는 대화형 AI)","다음 장소는 칸을 비우고 새로 써서 새 대화에서 따로 요청하기. 앞의 대화도 지우지 않기","대화는 지우지 않기. 이미지를 다 만들면 그 대화의 공유 링크를 만들어 모아 두기 (영상과 함께 제출). 엔딩 크레딧에 활용한 AI 도구와 AI로 생성한 이미지 목록 적기"]
 };
-const CH_LABELS={kinddesc:"사는 세계·환경",name:"인물 이름",age:"나이, 성별",look:"생김새",outfit:"옷차림",person:"성격",pose:"표정과 자세",key:"꼭 보여야 할 소품"};
+const CH_LABELS={kinddesc:"사는 세계·환경",name:"인물 이름",age:"나이·성별",look:"생김새",outfit:"옷차림",person:"성격",pose:"표정과 자세",key:"꼭 보여야 할 소품"};
 
+const PL_LABELS={place:"장소 이름",see:"해당 장소에 보이는 것",time:"시간과 날씨",mood:"분위기"};
+function missingFields(){
+  if(state.tab==="character") return CH_FIELDS.filter(k=>!val(state.ch[k])).map(k=>k==="kinddesc"&&state.ch.kind!=="사람"?"어떤 존재인지":CH_LABELS[k]);
+  return [...new Set(state.places.flatMap(p=>Object.keys(PL_LABELS).filter(k=>!val(p[k])).map(k=>PL_LABELS[k])))];
+}
+var showMissing=false;
 function check(){
   if(state.preset==null) return {ok:false,msg:"<strong>그림체를 고르세요.</strong> 1단계에서 하나를 고르면 프롬프트가 완성됩니다."};
   if(state.tab==="character"){
     if(!val(state.ch.name)) return {ok:false,msg:"<strong>인물 이름을 쓰세요.</strong> 인물 이름 칸은 꼭 필요합니다."};
-    const empty=CH_FIELDS.filter(k=>k!=="name"&&!val(state.ch[k])).map(k=>k==="kinddesc"&&state.ch.kind!=="사람"?"어떤 존재인지":CH_LABELS[k]);
-    return {ok:true,msg:empty.length?`비어 있는 칸: ${empty.join(", ")}. 빈 칸은 AI가 채우고 'AI가 채운 것'에 알려 줍니다.`:"모든 칸을 채웠습니다."};
+    const empty=missingFields();
+    return empty.length?{ok:false,msg:`<strong>모든 칸을 채우세요.</strong> 비어 있는 칸: ${empty.join(", ")}`}:{ok:true,msg:"모든 칸을 채웠습니다."};
   }
   const miss=state.places.map((p,i)=>val(p.place)?null:i+1).filter(Boolean);
   if(miss.length) return {ok:false,msg:`<strong>장소 이름을 쓰세요.</strong> 장소 이름 칸은 꼭 필요합니다.`};
-  const empty=state.places.flatMap((p,i)=>["see","time","mood"].filter(k=>!val(p[k])).map(()=>i+1));
-  return {ok:true,msg:empty.length?"비어 있는 칸은 AI가 채우고 'AI가 채운 것'에 알려 줍니다.":"모든 칸을 채웠습니다."};
+  const empty=missingFields();
+  return empty.length?{ok:false,msg:`<strong>모든 칸을 채우세요.</strong> 비어 있는 칸: ${empty.join(", ")}`}:{ok:true,msg:"모든 칸을 채웠습니다."};
 }
 
 var lastCopied=null;
@@ -1165,7 +1171,8 @@ function update(){
   $("#out-warn").hidden=!mm;
   $("#copy").disabled=!c.ok||mm;
   $("#copy").classList.toggle("ready",c.ok&&!mm&&c.msg==="모든 칸을 채웠습니다."&&text!==lastCopied);
-  $("#f-ch-name").classList.toggle("missing",isCh&&!val(state.ch.name)&&state.preset!=null);
+  document.querySelectorAll('[data-screen="4"] .f').forEach(f=>{const el=f.querySelector('input:not([type=checkbox]):not([type=radio]),textarea'); if(el) f.classList.toggle("missing",showMissing&&!el.value.trim()&&!!f.closest("#panel-"+state.tab));});
+  if(showMissing&&screen===4&&!missingFields().length) $("#wiz-msg").hidden=true;
   $("#next").innerHTML=NEXT[state.tab].map(s=>`<li>${esc(s)}</li>`).join("");
 
   // 샷·방향 안내
@@ -1314,12 +1321,12 @@ const pledgesDone=()=>[...document.querySelectorAll("[data-pledge]")].every(c=>c
 function blockMsg(n){
   if(n===1&&!pledgesDone()) return "모든 약속에 체크해야 다음으로 넘어갈 수 있습니다.";
   if(n===3){ if(state.preset==null) return "그림체를 하나 고르세요."; if(mismatch()) return "그림체 경고를 먼저 해결하세요. 앞에서 만든 것과 같은 그림체로 돌아가거나, 그림체를 바꾸고 모두 다시 만들기를 고릅니다."; }
-  if(n===4){ if(state.tab==="character"&&!val(state.ch.name)) return "인물 이름을 쓰세요.";
-    if(state.tab==="background"&&!val((state.places[0]||{}).place)) return "장소 이름을 쓰세요."; }
+  if(n===4){ const m=missingFields(); if(m.length){showMissing=true;update();return "모든 칸을 채워야 다음으로 넘어갈 수 있습니다. 비어 있는 칸: "+m.join(", ");} }
   return "";
 }
 function showScreen(n,noScroll){
   screen=n;maxScreen=Math.max(maxScreen,n);document.body.dataset.screen=n;
+  if(n<4&&showMissing){showMissing=false;update();}
   document.querySelectorAll(".screen").forEach(el=>el.hidden=+el.dataset.screen!==n);
   const kind=state.tab==="character"?"인물":"배경";
   document.querySelectorAll(".stepper [data-go]").forEach(b=>{const k=+b.dataset.go;
