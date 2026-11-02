@@ -743,7 +743,7 @@ $("#wiz-next").addEventListener("click",()=>{const q=seq(),i=q.indexOf(screen);
   showScreen(q[i+1]);});
 $("#wiz-prev").addEventListener("click",()=>{const q=seq(),i=q.indexOf(screen);if(i>0)showScreen(q[i-1]);});
 document.querySelectorAll(".stepper [data-go]").forEach(b=>b.addEventListener("click",()=>showScreen(+b.dataset.go)));
-["obj","draw"].forEach(t=>$("#tab-"+t).addEventListener("click",()=>{if(screen===2) showScreen(3); else showScreen(screen,true)}));
+["obj","draw"].forEach(t=>$("#tab-"+t).addEventListener("click",()=>showScreen(screen,true)));
 document.querySelector(".tabs").addEventListener("keydown",e=>{if(e.key==="ArrowRight"||e.key==="ArrowLeft")showScreen(screen,true)});
 showScreen(+store.get("screen",1)||1,true);
 })();

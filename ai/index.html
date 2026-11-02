@@ -1,4 +1,10 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
 <title>북 트레일러 (AI 프롬프트)</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -437,7 +443,7 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
       </div>
     </div>
   </header>
-  <nav class="stepper" aria-label="진행 단계"><ol><li><button type="button" data-go="1"><span class="sn">1</span><span class="sl">시작 전 확인</span></button></li><li><button type="button" data-go="2"><span class="sn">2</span><span class="sl">인물·배경 고르기</span></button></li><li><button type="button" data-go="3"><span class="sn">3</span><span class="sl">그림체 고르기</span></button></li><li><button type="button" data-go="4"><span class="sn">4</span><span class="sl">묘사하기</span></button></li><li><button type="button" data-go="5"><span class="sn">5</span><span class="sl">화면 고르기</span></button></li><li><button type="button" data-go="6"><span class="sn">6</span><span class="sl">프롬프트 복사</span></button></li></ol></nav>
+  <nav class="stepper" aria-label="진행 단계"><ol><li><button type="button" data-go="1"><span class="sn">1</span><span class="sl">시작 전 확인</span></button></li><li><button type="button" data-go="2"><span class="sn">2</span><span class="sl">만들 것 고르기</span></button></li><li><button type="button" data-go="3"><span class="sn">3</span><span class="sl">그림체 고르기</span></button></li><li><button type="button" data-go="4"><span class="sn">4</span><span class="sl">묘사하기</span></button></li><li><button type="button" data-go="5"><span class="sn">5</span><span class="sl">화면 고르기</span></button></li><li><button type="button" data-go="6"><span class="sn">6</span><span class="sl">프롬프트 복사</span></button></li></ol></nav>
   <div class="modal" id="paste-modal" hidden>
     <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="paste-title" aria-describedby="paste-desc">
       <div class="modal-head"><h2 id="paste-title">붙여넣기는 할 수 없습니다</h2><button class="modal-x" type="button" id="paste-close" aria-label="닫기">×</button></div>
@@ -477,7 +483,7 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
     </ul>
   </section>
   <section class="step screen" data-screen="2" aria-labelledby="h-s2">
-    <div class="step-head"><h2 id="h-s2">무엇을 만들까요?</h2><p class="step-sub">인물 한 명 또는 장소 한 곳을 고릅니다. 다 만든 뒤 다시 여기로 돌아와 다음 인물·장소를 만듭니다.</p></div>
+    <div class="step-head"><h2 id="h-s2">만들 것 고르기</h2><p class="step-sub">인물 한 명 또는 장소 한 곳을 고릅니다. 다 만든 뒤 다시 여기로 돌아와 다음 인물·장소를 만듭니다.</p></div>
   <div class="tabs pick" role="tablist" aria-label="만들 이미지">
     <button role="tab" id="tab-character" aria-controls="panel-character" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>인물 만들기</button>
     <button role="tab" id="tab-background" aria-controls="panel-background" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg>배경 만들기</button>
@@ -1292,7 +1298,7 @@ function showScreen(n,noScroll){
   document.querySelectorAll(".stepper [data-go]").forEach(b=>{const k=+b.dataset.go;
     b.disabled=k>maxScreen;b.classList.toggle("done",k<n);
     if(k===n) b.setAttribute("aria-current","step"); else b.removeAttribute("aria-current");
-    if(k===2) b.querySelector(".sl").textContent=maxScreen>2||n>2?kind+" 만들기":"인물·배경 고르기";
+    if(k===2) b.querySelector(".sl").textContent="만들 것 고르기";
     if(k===4) b.querySelector(".sl").textContent=(state.tab==="character"?"인물":"장소")+" 묘사하기";});
   $("#wiz-prev").hidden=n===1;
   $("#wiz-next").textContent=n===1?"시작하기 →":n===5?"프롬프트 보기 →":n===6?"다른 인물·장소 만들기":"다음 →";
@@ -1308,9 +1314,10 @@ $("#wiz-next").addEventListener("click",()=>{ if(screen===6){showScreen(2);retur
 $("#wiz-prev").addEventListener("click",()=>{ if(screen>1) showScreen(screen-1); });
 document.querySelectorAll(".stepper [data-go]").forEach(b=>b.addEventListener("click",()=>{const k=+b.dataset.go; if(k<=screen) showScreen(k); else goForward(k);}));
 document.querySelectorAll("[data-pledge]").forEach(cb=>cb.addEventListener("change",()=>{ if(pledgesDone()) $("#wiz-msg").hidden=true; }));
-["character","background"].forEach(t=>$("#tab-"+t).addEventListener("click",()=>{ if(screen===2) showScreen(3); }));
+["character","background"].forEach(t=>$("#tab-"+t).addEventListener("click",()=>{ if(screen===2) showScreen(2,true); }));
 (function(){ const sv=store.get("screen",null); if(sv&&pledgesDone()){maxScreen=Math.max(1,Math.min(6,sv.max||1));showScreen(Math.min(6,Math.max(1,sv.n||1)),true)} else showScreen(1,true); })();
 })();
 </script>
 
-</body></html>
+</body>
+</html>
