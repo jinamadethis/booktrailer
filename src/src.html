@@ -1,0 +1,1576 @@
+<title>북 트레일러 (AI 프롬프트)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root{color-scheme:light}
+
+/* Layout: 왼쪽은 칸 채우기(단계 순서), 오른쪽은 완성되는 프롬프트를 붙여 둔 패널. 좁은 화면에서는 아래로 쌓음 */
+@font-face{font-family:"Paperlogy";font-weight:700;font-display:swap;src:url(data:font/woff2;base64,__PAPER7__) format("woff2")}
+@font-face{font-family:"Paperlogy";font-weight:800;font-display:swap;src:url(data:font/woff2;base64,__PAPER8__) format("woff2")}
+@font-face{font-family:"SUIT";font-weight:100 900;font-display:swap;src:url(data:font/woff2;base64,__SUIT__) format("woff2")}
+:root{
+  --bg:#F2F3F6; --surface:#FFFFFF; --sunk:#E9EBF0; --ink:#171A27; --muted:#585E72; --line:#D6D9E1;
+  --accent:#2D47C8; --accent-ink:#FFFFFF; --accent-soft:#E5E9FA;
+  --warn:#9A4A06; --warn-soft:#FFF1DE; --ok:#1C6E46; --ok-soft:#E1F3E9; --no:#A42A2A; --no-soft:#FBE7E7;
+  --slip:#FBFBF8;
+  --display:"Paperlogy","SUIT",system-ui,sans-serif;
+  --body:"SUIT",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --r:10px;
+}
+
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+/* 배경 탭: 초록 톤 테마로 확실히 구분 */
+body.tab-bg{--bg:#EAF3EC;--surface:#FBFDFB;--sunk:#DCEBE0;--line:#C6DCCB;--slip:#F6FBF7;--accent:#23784A;--accent-ink:#FFFFFF;--accent-soft:#D8EEDF}
+
+
+body{transition:background-color .25s ease}
+@media (prefers-reduced-motion:reduce){body{transition:none}}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:1240px;margin:0 auto;display:grid;gap:24px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.25}
+h1{font-weight:800;font-size:clamp(28px,4.4vw,40px);letter-spacing:-.01em}
+h2{font-weight:700;font-size:20px}
+h3{font-weight:700;font-size:16px}
+p{margin:0}
+.ver{font-weight:500;opacity:.7;letter-spacing:0}
+.eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.06em;color:var(--muted)}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* 머리 */
+header{display:grid;gap:14px}
+.lede{color:var(--muted);max-width:62ch}
+.pledge{list-style:none;margin:0;padding:14px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+@media (max-width:640px){.pledge{grid-template-columns:minmax(0,1fr)}}
+.pledge-title{font-weight:700;font-size:14px;grid-column:1/-1}
+.pledge label{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;cursor:pointer;line-height:1.5}
+.pledge input{width:18px;height:18px;margin:2px 0 0;flex-shrink:0;accent-color:var(--accent)}
+.pledge input:checked + span{color:var(--muted)}
+
+/* 탭 */
+.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%}
+.tabs button{display:flex;align-items:center;justify-content:center;gap:10px;min-height:60px;padding:12px 20px;border:2px solid var(--line);background:var(--surface);border-radius:12px;font-weight:700;cursor:pointer;color:var(--ink);font-family:var(--display);font-size:20px}
+.tabs button:hover{border-color:var(--accent)}
+.tabs button svg{width:24px;height:24px;flex-shrink:0}
+.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 2px 8px rgba(45,71,200,.25)}
+
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:24px;align-items:start}
+@media (max-width:960px){.main{grid-template-columns:minmax(0,1fr)}}
+.col{display:grid;gap:20px;min-width:0}
+
+.step{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:grid;gap:16px;min-width:0}
+.step-head{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.step-no{font-family:var(--display);font-weight:800;font-size:13px;color:var(--accent);letter-spacing:.04em}
+.step-sub{color:var(--ink);font-size:15.5px;flex-basis:100%}
+.step-head .note{flex-basis:100%;font-size:14.5px}
+fieldset .hint{font-size:12.5px;color:var(--muted)}
+
+/* 그림체 카드 */
+.presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (min-width:961px) and (max-width:1100px){.presets{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:720px){.presets{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.presets{grid-template-columns:minmax(0,1fr)}}
+.preset{position:relative;display:grid;align-content:start;gap:6px;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;cursor:pointer;background:var(--surface)}
+.preset input{position:absolute;opacity:0;pointer-events:none}
+.preset:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:var(--accent-soft)}
+.preset:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.preset .top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:4px 8px}
+.preset .sw{margin-top:3px}
+.preset .nm{font-family:var(--display);font-weight:700;font-size:15px;white-space:nowrap}
+.preset .num{font-family:var(--display);font-weight:800;color:var(--accent);margin-right:6px}
+.preset .ds{font-size:13px;color:var(--muted);line-height:1.5;word-break:keep-all}
+.sw{display:flex;gap:4px;flex-shrink:0}
+.sw i{width:15px;height:15px;border-radius:50%;border:1px solid var(--line);display:block}
+.preview{display:grid;gap:12px;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--slip)}
+.pv-imgs{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,8fr);gap:10px;align-items:stretch}
+.pv-fig{grid-template-rows:auto 1fr}
+.pv-fig{margin:0;display:grid;gap:4px;min-width:0}
+.pv-fig figcaption{font-size:12.5px;color:var(--muted);font-weight:600}
+.preview-img{width:100%;background:#FFFFFF;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.preview-img.ch{height:100%}
+.preview-img.bg{aspect-ratio:16/9}
+
+.preview-img img{width:100%;height:100%;object-fit:contain;display:block}
+.preview-img.bg img{object-fit:cover}
+.preview-img span{font-size:12.5px;color:#6B7080;text-align:center;padding:8px}
+.preview-txt{display:grid;gap:4px;min-width:0}
+.preview-txt .pv-name{font-family:var(--display);font-weight:700;font-size:17px}
+@media (max-width:480px){.pv-imgs{grid-template-columns:minmax(0,1fr)}.pv-fig.ch-fig{max-width:180px}.preview-img.ch{height:auto;aspect-ratio:3/4}}
+.lock-badge{display:none;font-size:11.5px;font-weight:700;color:var(--ok);background:var(--ok-soft);border-radius:999px;padding:1px 8px}
+.preset.locked .lock-badge{display:inline-block}
+
+.alert{border-radius:var(--r);padding:14px 16px;display:grid;gap:10px;font-size:14px}
+.alert.warn{background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn)}
+.alert.warn strong{color:var(--warn)}
+.alert .btns{display:flex;flex-wrap:wrap;gap:8px}
+
+/* 입력 */
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}
+@media (max-width:600px){.fields{grid-template-columns:minmax(0,1fr)}}
+.f{display:grid;gap:5px;min-width:0}
+.f.wide{grid-column:1/-1}
+.no-real{color:var(--no);font-weight:700}
+.f label,.legend{font-weight:600;font-size:14px}
+.f label small,.legend small{font-weight:400;color:var(--muted);margin-left:4px}
+.f input,.f textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--slip);padding:9px 11px;line-height:1.5}
+.f textarea{min-height:64px;resize:vertical}
+.f input::placeholder,.f textarea::placeholder{color:var(--muted);opacity:.75}
+.f .hint{font-size:12.5px;color:var(--muted)}
+.f.missing input,.f.missing textarea{border-color:var(--no);border-width:2px}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:6px;min-width:0}
+fieldset > legend.legend{padding:0;margin-bottom:8px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;font-size:14px;cursor:pointer;background:var(--surface)}
+.seg input:checked + span{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:600}
+.seg input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.note{font-size:13px;color:var(--muted);background:var(--sunk);border-radius:8px;padding:8px 12px}
+
+/* 장소 카드 */
+.place{border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:14px;background:var(--slip)}
+.place-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.place-head h3{font-size:15px}
+.place .f input,.place .f textarea{background:var(--surface)}
+.frame-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:end}
+@media (max-width:600px){.frame-row{grid-template-columns:minmax(0,1fr)}}
+.mini{width:128px;aspect-ratio:16/9;max-width:100%;border:1.5px solid var(--ink);border-radius:3px;display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden;background:var(--sunk)}
+.mini i{display:block}
+.mini i.on{background:repeating-linear-gradient(-45deg,var(--accent-soft) 0 5px,transparent 5px 9px);border-inline:1px dashed var(--accent)}
+.mini-cap{font-size:11.5px;color:var(--muted);text-align:center;margin-top:4px}
+
+/* O/X */
+.ox{display:grid;gap:6px}
+.ox-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:6px}
+.ox-row div{font-size:13.5px;padding:7px 10px;border-radius:7px;display:flex;gap:8px;align-items:baseline;line-height:1.45}
+.ox-row .o{background:var(--ok-soft)}
+.ox-row .x{background:var(--no-soft)}
+.ox-row b{font-family:var(--display);font-weight:800;flex-shrink:0}
+.ox-row .o b{color:var(--ok)} .ox-row .x b{color:var(--no)}
+@media (max-width:480px){.ox-row{grid-template-columns:minmax(0,1fr)}}
+
+/* 버튼 */
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:600;font-size:14px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-size:16px;padding:12px 18px;width:100%}
+.btn.primary:disabled{opacity:.45;cursor:not-allowed}
+/* 모든 칸을 채우면 복사 버튼이 반짝임 */
+#copy.ready{position:relative;overflow:hidden}
+#copy.ready::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);pointer-events:none;left:var(--sx,-60%)}
+.btn.small{padding:5px 10px;font-size:13px}
+.btn.ghost{background:transparent}
+.row-btns{display:flex;flex-wrap:wrap;gap:8px}
+
+/* 결과 패널 */
+.out{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);display:grid;gap:14px;min-width:0}
+@media (max-width:960px){.out{position:static}}
+.out-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px;min-width:0}
+.out-card .label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.slip{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;background:var(--slip);border:1px dashed var(--line);border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:46vh;overflow:auto;margin:0;font-family:var(--body)}
+.slip mark{background:var(--accent-soft);color:var(--ink);border-radius:3px;padding:0 2px}
+.status{font-size:13.5px;border-radius:8px;padding:8px 12px}
+.status.empty{background:var(--sunk);color:var(--muted)}
+.status.bad{background:var(--no-soft);color:var(--ink)}
+.status.bad strong{color:var(--no)}
+.next{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px}
+.next li::marker{font-family:var(--display);font-weight:800;color:var(--accent)}
+.made{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;background:var(--slip)}
+.chip.bg{border-style:dashed}
+.toast{font-size:14px;font-weight:600;color:var(--ok);background:var(--ok-soft);border-radius:8px;padding:8px 12px}
+.muted{color:var(--muted)}
+.fs13{font-size:13px}
+/* 단계별 화면 */
+.main{grid-template-columns:minmax(0,1fr)!important}
+.wrap > .screen,body:not([data-screen="6"]) .main,.wiz-nav,.stepper{max-width:920px;width:100%;margin-inline:auto}
+@media (min-width:961px){body[data-screen="6"] .main{grid-template-columns:minmax(0,1fr) minmax(0,400px)!important}}
+.stepper ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.stepper button{width:100%;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--muted);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;text-align:left;min-height:44px}
+.stepper .sn{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--sunk);font-family:var(--display);font-weight:800;font-size:13px;flex-shrink:0}
+.stepper .sl{line-height:1.25;word-break:keep-all}
+.stepper button.done{color:var(--ink)}.stepper button.done .sn{background:var(--accent-soft);color:var(--accent)}
+.stepper button[aria-current="step"]{border-color:var(--accent);color:var(--ink);background:var(--surface);box-shadow:0 0 0 2px var(--accent-soft)}
+.stepper button[aria-current="step"] .sn{background:var(--accent);color:var(--accent-ink)}
+.stepper button:disabled{opacity:.55;cursor:default}
+@media (max-width:760px){.stepper .sl{display:none}.stepper button{justify-content:center;padding:6px}.stepper button[aria-current="step"] .sl{display:inline}.stepper ol{grid-template-columns:repeat(7,auto);justify-content:space-between}.stepper button[aria-current="step"]{padding:6px 10px}}
+.tabs.pick{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tabs.pick button{min-height:140px;flex-direction:column;font-size:22px;gap:12px}
+.tabs.pick button svg{width:40px;height:40px}
+@media (max-width:520px){.tabs.pick button{min-height:120px;font-size:18px;word-break:keep-all;padding:12px 8px}}
+.wiz-nav{display:flex;justify-content:space-between;gap:10px;position:sticky;bottom:0;padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 70%,transparent);z-index:20}
+.wiz-nav .btn{min-height:48px;padding:10px 22px;font-size:16px;font-weight:700;white-space:nowrap;flex:0 0 auto;width:auto}
+.wiz-nav #wiz-next{margin-left:auto;min-width:min(260px,60%)}
+.slip-wrap summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);padding:4px 0}
+.slip-wrap[open] summary{margin-bottom:8px}
+.wiz-nav #wiz-prev[hidden]+#wiz-next{margin-left:auto}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.toast-float{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.15);max-width:calc(100vw - 32px)}
+.pledge{grid-template-columns:minmax(0,1fr)!important;padding:4px 0!important;border:0!important;background:none!important;gap:10px!important}
+.pledge label{font-size:16px!important;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface)}
+.pledge input{width:20px!important;height:20px!important}
+.help-btns{display:flex;gap:8px;flex-wrap:wrap}
+.modal-box.wide{max-width:680px}
+/* Gemini 학교 계정: Drive를 통해 공유 */
+.demo .g2menu{right:2.5%;top:13%;width:34%;height:80%;display:flex;flex-direction:column;justify-content:space-around;padding:2% 0}
+.demo .g2menu .it{height:auto;padding:0 7%;font-size:.95em}
+.demo .g2menu .it.hl{margin:0 3%;padding:2.5% 5%}
+.demo .g2conn{left:22%;top:16%;width:56%;height:68%;border-radius:16px;text-align:center}
+.g2c-ic{position:absolute;left:0;right:0;top:9%;font-size:1.6em}
+.g2c-t{position:absolute;left:0;right:0;top:30%;font-size:1.25em;font-weight:700}
+.g2c-s{position:absolute;left:8%;right:8%;top:47%;font-size:.88em;color:#4A4F5E;line-height:1.4}
+.g2c-b{position:absolute;right:6%;bottom:8%;display:flex;gap:10%;align-items:center}
+.g2c-b span{color:#0B57D0;font-weight:600;white-space:nowrap}
+.g2c-b b{background:#0B57D0;color:#fff;border-radius:999px;padding:.35em 1.2em;white-space:nowrap}
+.demo .g2sh{left:16%;top:4%;width:68%;height:92%;border-radius:14px;font-size:.86em}
+.g2s-t{position:absolute;left:6%;right:6%;top:5%;font-size:1.25em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g2s-in{position:absolute;left:6%;right:6%;top:18%;height:12%;border:1px solid #C4C9D4;border-radius:6px;display:flex;align-items:center;padding:0 3%;color:#8A8F9E}
+.g2s-l{position:absolute;left:6%;font-weight:600}
+.g2s-me{position:absolute;left:6%;right:6%;top:46%;height:12%;display:flex;align-items:center;gap:3%}
+.g2s-me i{width:1.9em;height:1.9em;border-radius:50%;background:#1F4E3D;color:#fff;font-style:normal;font-size:.85em;display:flex;align-items:center;justify-content:center}
+.g2s-me em{margin-left:auto;font-style:normal;color:#5B6070}
+.g2s-acc{position:absolute;left:4%;right:4%;top:71%;height:14%;border-radius:8px;outline:2.5px solid #D93025;outline-offset:1px}
+.g2a{position:absolute;inset:0;display:flex;align-items:center;gap:3%;padding:0 2%}
+.g2a > span{display:flex;flex-direction:column;line-height:1.25}
+.g2a small{font-size:.8em;color:#5B6070;white-space:nowrap}
+.g2a i{width:1.9em;height:1.9em;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.g2a i svg{width:1.1em;height:1.1em}
+.g2a i.lk{background:#E8EAED}.g2a i.sc{background:#D3E3FD;color:#0B57D0}
+.g2a em{margin-left:auto;font-style:normal;white-space:nowrap}
+.g2s-f{position:absolute;left:5%;right:5%;bottom:3%;height:10%;display:flex;align-items:center;justify-content:space-between}
+.g2s-cp{display:flex;align-items:center;gap:5px;height:100%;padding:0 1em;border:1px solid #747775;border-radius:999px;color:#0B57D0;font-weight:600;white-space:nowrap}
+.g2s-cp svg{width:1.1em;height:1.1em}
+.g2s-f b{height:100%;display:flex;align-items:center;padding:0 1.3em;border-radius:999px;background:#0B57D0;color:#fff;white-space:nowrap}
+.demo .g2dd{left:22%;top:50%;width:44%;height:38%;border-radius:8px;display:flex;flex-direction:column;justify-content:space-around;padding:2% 0;font-size:.9em;z-index:3}
+.demo .g2dd div{padding:0 8%;white-space:nowrap}
+.demo .g2dd .hl{background:#F0F1F5;margin:0 3%;padding:3% 5%;border-radius:6px}
+
+/* 경고 팝업 */
+.wiz-msg-text{font-size:16px;line-height:1.6;word-break:keep-all;margin:0}
+.msg-btns{display:flex;justify-content:flex-end;margin-top:16px}
+.msg-btns .btn{width:auto;min-width:120px}
+#preset-modal .alert{border:0;background:none;padding:0;font-size:15px}
+#preset-modal .modal-head h2{color:var(--warn)}
+
+.ai-tabs{display:flex;gap:6px;margin-bottom:12px}
+.ai-tabs button{flex:1;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);font-family:var(--display);font-weight:700;font-size:15px;cursor:pointer;color:var(--ink)}
+.ai-tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.demo{position:relative;aspect-ratio:16/10;border:1.5px solid var(--line);border-radius:10px;background:#FFFFFF;overflow:hidden;color:#1D2130;font-size:clamp(9px,2.1vw,13px);--loop:6.5s}
+.demo .bar{position:absolute;left:0;right:0;top:0;height:15%;border-bottom:1px solid #E6E8EE;display:flex;align-items:center;padding:0 3%}
+.demo .ttl{width:28%;height:20%;border-radius:4px;background:#E6E8EE}
+.demo .msg{position:absolute;border-radius:10px;background:#F1F2F6}
+.demo .m1{right:6%;top:22%;width:38%;height:10%;background:#E8ECFB}
+.demo .m2{left:6%;top:37%;width:60%;height:9%} .demo .m3{left:6%;top:49%;width:44%;height:9%}
+.demo .pic{position:absolute;left:6%;top:61%;width:22%;height:27%;border-radius:8px;background:repeating-linear-gradient(135deg,#E3E6EE 0 6px,#EEF0F5 6px 12px)}
+.demo .tb{position:absolute;top:3.2%;height:9%;display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid #D9DCE5;border-radius:999px;background:#fff;font-weight:600;white-space:nowrap;padding:0 1.6%}
+.demo .tb svg,.demo .pop svg{width:1.2em;height:1.2em;flex-shrink:0}
+.demo .tb.dots{border:0;width:5%;padding:0;font-size:1.6em;line-height:1}
+.demo .pop{position:absolute;background:#fff;border:1px solid #D9DCE5;border-radius:10px;box-shadow:0 8px 24px rgba(20,24,40,.16);opacity:0;animation:pop var(--loop) infinite}
+.demo .pop .it{display:flex;align-items:center;gap:6px;padding:0 8%;height:30%;white-space:nowrap}
+.demo .pop .it.hl{background:#F0F1F5;border-radius:8px;margin:0 3%;padding:0 5%}
+.demo .pop .pbtn{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#1D2130;color:#fff;font-weight:700;white-space:nowrap}
+.demo .pop .ph{position:absolute;left:8%;height:7%;border-radius:4px;background:#EEF0F5}
+.demo .toast{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;background:#1D2130;color:#fff;border-radius:999px;padding:1.2% 3.2%;font-weight:700;white-space:nowrap;opacity:0;animation:toast var(--loop) infinite}
+.demo .toast svg{width:1.3em;height:1.3em}
+.demo .ring{position:absolute;width:9%;aspect-ratio:1;border-radius:50%;border:2.5px solid var(--accent);transform:translate(-50%,-50%) scale(.3);opacity:0;pointer-events:none}
+.demo .r1{left:var(--bx);top:var(--by);animation:ring1 var(--loop) infinite}
+.demo .r2{left:var(--ix);top:var(--iy);animation:ring2 var(--loop) infinite}
+.demo .cur{position:absolute;width:5.5%;left:0;top:0;animation:cur var(--loop) infinite;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+@keyframes cur{0%{left:45%;top:70%}14%{left:var(--bx);top:var(--by)}20%{left:var(--bx);top:var(--by)}36%{left:var(--ix);top:var(--iy)}44%{left:var(--ix);top:var(--iy)}90%{left:var(--ix);top:var(--iy)}100%{left:45%;top:70%}}
+@keyframes ring1{0%,15%{opacity:0;transform:translate(-50%,-50%) scale(.3)}16%{opacity:1}24%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}100%{opacity:0}}
+@keyframes ring2{0%,38%{opacity:0;transform:translate(-50%,-50%) scale(.3)}39%{opacity:1}47%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}100%{opacity:0}}
+@keyframes pop{0%,18%{opacity:0;transform:translateY(-4px)}21%,41%{opacity:1;transform:none}44%,100%{opacity:0}}
+@keyframes toast{0%,42%{opacity:0;transform:translate(-50%,8px)}46%,86%{opacity:1;transform:translate(-50%,0)}92%,100%{opacity:0}}
+.demo.g3{--loop:8.5s}
+.demo.g3 .cur{animation-name:cur3} .demo.g3 .r1{animation-name:g3r1} .demo.g3 .r2{animation-name:g3r2}
+.demo .r3{left:var(--jx);top:var(--jy);animation:g3r3 var(--loop) infinite}
+.demo.g3 .p1{animation-name:g3p1} .demo.g3 .p2{animation-name:g3p2} .demo.g3 .toast{animation-name:g3t}
+.demo .gdlg{border-radius:16px;background:#F3F6FB}
+.gd-t{position:absolute;left:6%;top:7%;font-size:1.35em}
+.gd-link{position:absolute;left:5%;right:5%;top:22%;height:18%;border-radius:999px;background:#DFE4EC;display:flex;align-items:center;justify-content:space-between;padding:0 1.5% 0 5%}
+.gd-url{text-decoration:underline;white-space:nowrap;overflow:hidden}
+.gd-btn{display:flex;align-items:center;gap:4px;height:76%;padding:0 5%;border-radius:999px;background:#0B57D0;color:#fff;font-weight:700;white-space:nowrap}
+.gd-hr{position:absolute;left:0;right:0;top:72%;border-top:1px solid #D9DCE5}
+.gd-sns{position:absolute;left:10%;right:10%;top:78%;display:flex;justify-content:space-between}
+.gd-sns i{width:9%;aspect-ratio:1;border-radius:50%;background:#C9CED8}
+@keyframes cur3{0%{left:45%;top:70%}10%,15%{left:var(--bx);top:var(--by)}26%,32%{left:var(--ix);top:var(--iy)}44%,90%{left:var(--jx);top:var(--jy)}100%{left:45%;top:70%}}
+@keyframes g3r1{0%,10%{opacity:0;transform:translate(-50%,-50%) scale(.3)}11%{opacity:1}18%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}
+@keyframes g3r2{0%,27%{opacity:0;transform:translate(-50%,-50%) scale(.3)}28%{opacity:1}35%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}
+@keyframes g3r3{0%,46%{opacity:0;transform:translate(-50%,-50%) scale(.3)}47%{opacity:1}54%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}
+@keyframes g3p1{0%,12%{opacity:0;transform:translateY(-4px)}14%,29%{opacity:1;transform:none}31%,100%{opacity:0}}
+@keyframes g3p2{0%,31%{opacity:0;transform:scale(.97)}34%,90%{opacity:1;transform:none}95%,100%{opacity:0}}
+@keyframes g3t{0%,48%{opacity:0;transform:translate(-50%,8px)}52%,88%{opacity:1;transform:translate(-50%,0)}93%,100%{opacity:0}}
+.demo.g1{--loop:6s}
+.demo.g1 .cur{animation-name:cur1}
+.gbanner{position:absolute;left:5%;right:5%;top:17%;display:flex;align-items:center;gap:3%;background:#0F7B3E;color:#fff;border-radius:12px;padding:2.2% 3%;opacity:0;animation:gban var(--loop) infinite}
+.gb-ic svg{width:1.6em;height:1.6em;display:block}
+.gb-tx{display:grid;gap:2px;flex:1;min-width:0}.gb-tx b{font-size:1.1em}.gb-tx span{opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gb-btn{border:1px solid rgba(255,255,255,.5);border-radius:999px;padding:.4em .9em;white-space:nowrap}
+@keyframes cur1{0%{left:45%;top:70%}14%,92%{left:var(--bx);top:var(--by)}100%{left:45%;top:70%}}
+@keyframes gban{0%,18%{opacity:0;transform:translateY(-6px)}22%,86%{opacity:1;transform:none}92%,100%{opacity:0}}
+.demo .cdlg{font-size:.82em;border-radius:12px}
+.cd-t{position:absolute;left:6%;right:6%;top:4%;display:flex;justify-content:space-between;font-size:1.3em}
+.cd-s{position:absolute;left:6%;top:14%;color:#5B6070}
+.cd-in{position:absolute;left:6%;right:6%;top:23%;height:10%;display:flex;gap:3%}
+.cd-in span{flex:1;border:1px solid #D9DCE5;border-radius:8px;display:flex;align-items:center;padding:0 4%;color:#8A8F9E}
+.cd-in b{display:flex;align-items:center;padding:0 4%;border-radius:8px;background:#EEF0F5;color:#8A8F9E;font-weight:600}
+.cd-l{position:absolute;left:6%;top:38%;color:#5B6070}
+.cd-row{position:absolute;left:4%;right:4%;height:11%;display:flex;align-items:center;gap:3%;padding:0 2%;border-radius:8px}
+.cd-row i{width:1.9em;height:1.9em;border-radius:50%;background:#EEF0F5;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.9em;flex-shrink:0}
+.cd-row i svg{width:1.1em;height:1.1em}
+.cd-acc{top:46%;outline:2px dashed var(--accent);outline-offset:1px}
+.cd-gt{margin-left:auto;font-size:1.4em}
+.cd-me{top:60%}.cd-r{margin-left:auto;color:#5B6070}
+.cd-hr{position:absolute;left:5%;right:5%;top:84%;border-top:1px solid #E1E3EA}
+.cd-foot{position:absolute;right:5%;bottom:2.5%;height:10%;display:flex;gap:2.5%;align-items:center}
+.cd-foot i{height:100%;aspect-ratio:1;border-radius:8px;background:#EEF0F5;display:flex;align-items:center;justify-content:center}
+.cd-foot b{height:100%;display:flex;align-items:center;gap:5px;padding:0 1.1em;border-radius:8px;background:#1D2130;color:#fff;white-space:nowrap}
+.demo.c5{--loop:11s;--bx:89%;--by:8%}
+.demo.c5 .cur{animation-name:cur5}
+.demo.c5 .q1{animation-name:q1} .demo.c5 .q2{animation-name:q2} .demo.c5 .toast{animation-name:t5}
+.demo .kb{left:var(--bx);top:var(--by);animation:kb var(--loop) infinite}
+.demo .kc{left:var(--cx);top:var(--cy);animation:kc var(--loop) infinite}
+.demo .kd{left:var(--dx);top:var(--dy);animation:kd var(--loop) infinite}
+.demo .ke{left:var(--ex);top:var(--ey);animation:ke var(--loop) infinite}
+.demo .kf{left:var(--fx);top:var(--fy);animation:kf var(--loop) infinite}
+.sw{display:flex;align-items:center;gap:6px;white-space:nowrap}.sw svg{width:1.3em;height:1.3em}
+.cd-acc,.cd-sel{position:relative}.cd-acc .sw,.cd-sel .sw{position:absolute;left:3%;top:50%;transform:translateY(-50%)}
+.demo.c5 .sw.a{animation:swa var(--loop) infinite}.demo.c5 .sw.b{opacity:0;animation:swb var(--loop) infinite}
+.cd-sel{position:absolute;left:5%;right:5%;top:24%;height:10%;border-radius:8px;background:#EEF0F5;display:flex;align-items:center;padding:0 3%}
+.cd-box{position:absolute;left:5%;right:5%;top:40%;height:40%;border:1px solid #E1E3EA;border-radius:10px}
+.cd-f2{position:absolute;left:5%;right:5%;bottom:3%;height:10%;display:flex;gap:2.5%;align-items:stretch}
+.cd-f2 span,.cd-f2 b{display:flex;align-items:center;padding:0 1em;border-radius:8px;white-space:nowrap}
+.cd-f2 .stop{background:#FBE3E3;color:#B42318;margin-right:auto}.cd-f2 .bk{background:#EEF0F5}.cd-f2 b{background:#1D2130;color:#fff}
+@keyframes cur5{0%{left:45%;top:70%}8%,11%{left:var(--bx);top:var(--by)}20%,25%{left:var(--cx);top:var(--cy)}33%,38%{left:var(--dx);top:var(--dy)}47%,53%{left:var(--ex);top:var(--ey)}64%,92%{left:var(--fx);top:var(--fy)}100%{left:45%;top:70%}}
+@keyframes q1{0%,10%{opacity:0}12%,24%{opacity:1}26%,53%{opacity:0}55%,71%{opacity:1}73%,100%{opacity:0}}
+@keyframes q2{0%,24%{opacity:0}26%,53%{opacity:1}55%,100%{opacity:0}}
+@keyframes t5{0%,70%{opacity:0;transform:translate(-50%,8px)}73%,92%{opacity:1;transform:translate(-50%,0)}96%,100%{opacity:0}}
+@keyframes swa{0%,37%{opacity:1}38%,97%{opacity:0}100%{opacity:1}}
+@keyframes swb{0%,37%{opacity:0}38%,97%{opacity:1}100%{opacity:0}}
+@keyframes kb{0%,9%{opacity:0;transform:translate(-50%,-50%) scale(.3)}10%{opacity:1}16%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}
+@keyframes kc{0%,23%{opacity:0;transform:translate(-50%,-50%) scale(.3)}24%{opacity:1}30%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}
+@keyframes kd{0%,36%{opacity:0;transform:translate(-50%,-50%) scale(.3)}37%{opacity:1}43%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}
+@keyframes ke{0%,51%{opacity:0;transform:translate(-50%,-50%) scale(.3)}52%{opacity:1}58%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}
+@keyframes kf{0%,69%{opacity:0;transform:translate(-50%,-50%) scale(.3)}70%{opacity:1}76%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}
+.share-warn{margin:0 0 10px;padding:9px 12px;border-radius:8px;background:var(--no-soft);color:var(--ink);font-size:14.5px;border-left:4px solid var(--no)}
+.share-warn b:first-child{color:var(--no)}
+.demo-pair{display:grid;grid-template-columns:minmax(0,1fr) 27%;gap:10px;align-items:start}
+.demo.phone{aspect-ratio:9/17;border-radius:18px;border-width:2px;font-size:clamp(7.5px,1.5vw,10.5px)}
+.demo.phone .pbar{position:absolute;left:0;right:0;top:0;height:10%;border-bottom:1px solid #E6E8EE;display:flex;align-items:center;justify-content:space-between;padding:0 6% 0 8%}
+.demo.phone .pbar .ttl{width:40%;height:22%}
+.pdots{font-size:1.9em;line-height:1;font-weight:700}
+.demo.phone .cur{width:13%}
+.demo.phone .ring{width:22%}
+.pmenu{right:4%;top:9%;width:62%;height:26%}
+.pmenu .it{height:30%!important;padding:0 8%!important}
+.psheet{left:0;right:0;bottom:0;height:30%;border-radius:16px 16px 0 0}
+.ps-row{position:absolute;left:6%;right:6%;top:34%;display:flex;justify-content:space-between}
+.ps-row span{display:grid;justify-items:center;gap:3px;width:22%;white-space:nowrap}
+.ps-row i{width:2.9em;height:2.9em;border-radius:50%;background:#E3E6EE;display:flex;align-items:center;justify-content:center}
+.ps-row span:first-child i{background:#1D2130;color:#fff}
+.ps-row i svg{width:50%;height:50%}
+.demo.phone .toast{bottom:auto;top:13%;padding:2% 5%}
+.phone-steps{margin:8px 0 0;font-size:14px;padding:7px 10px;border-radius:8px;background:var(--sunk)}
+@media (max-width:520px){.demo-pair{grid-template-columns:minmax(0,1fr)}.demo.phone,.demo.phone2{width:52%;justify-self:center;font-size:8.5px}}
+.demo.phone2{aspect-ratio:9/17;border-radius:18px;border-width:2px;font-size:clamp(7.5px,1.45vw,10.5px)}
+.ph-top{position:absolute;left:0;right:0;top:0;height:10%;display:flex;align-items:center;justify-content:space-between;padding:0 7%}
+.ph-ham{font-size:1.5em;color:#5B6070}.ph-more{font-size:1.9em;font-weight:700;line-height:1;padding:0 2%}
+.pl{position:absolute;opacity:0;transition:opacity .35s,transform .45s;pointer-events:none}
+.pl.on{opacity:1}
+.pmenu2{right:4%;top:9%;width:62%;height:24%;background:#fff;border:1px solid #D9DCE5;border-radius:10px;box-shadow:0 8px 24px rgba(20,24,40,.16);display:grid;align-content:center}
+.pmenu2 .it{display:flex;align-items:center;gap:6px;padding:4% 9%;white-space:nowrap}.pmenu2 .it.hl{background:#F0F1F5;border-radius:8px;margin:0 4%;padding:4% 6%}
+.pmenu2 svg,.cs-btn svg,.gs-btn svg,.ptoast svg,.cs-o svg{width:1.25em;height:1.25em;flex-shrink:0}
+.ios{left:0;right:0;bottom:0;height:66%;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -6px 20px rgba(20,24,40,.15);overflow:hidden;transform:translateY(8%)}
+.ios.on{transform:none}
+.ios-in{position:absolute;left:0;right:0;top:0;transition:transform .7s ease}
+.ios.tall{height:47%}
+.demo .ios.scrolled .ios-in{transform:translateY(-34%)}
+.ios-link{display:flex;gap:6%;align-items:center;padding:6% 7% 4%;border-bottom:1px solid #E6E8EE}
+.ios-link i{width:16%;aspect-ratio:1;border-radius:8px;background:#EEF0F5}.ios-link span{flex:1;display:grid;gap:4px}
+.ios-link b,.ios-link em{height:.7em;border-radius:3px;background:#E3E6EE}.ios-link em{width:60%}
+.ios-row{display:flex;justify-content:space-between;padding:5% 7%;border-bottom:1px solid #EEF0F5}
+.ios-row .c{width:20%;aspect-ratio:1;border-radius:50%;background:#E3E6EE}.ios-row .a{width:20%;aspect-ratio:1;border-radius:22%;background:#E3E6EE}
+.ios-row.act span{width:20%;display:grid;justify-items:center;gap:3px;white-space:nowrap}
+.ios-row.act i{width:2.7em;height:2.7em;border-radius:50%;background:#EEF0F5;display:flex;align-items:center;justify-content:center}
+.ios-row.act .cp i{background:#1D2130;color:#fff}.ios-row.act i svg{width:48%;height:48%}
+.ios-list{margin:3% 6%;border-radius:10px;background:#F1F2F6;display:grid}.ios-list span{height:2.4em;border-bottom:1px solid #E3E6EE}
+.gcard{left:16%;right:16%;top:9%;height:30%;background:#fff;border-radius:14px;box-shadow:0 6px 18px rgba(20,24,40,.15);display:flex;flex-direction:column;justify-content:flex-end;padding:5% 7%;gap:2px}
+.gcard span{color:#2563A8}
+.gsheet{inset:4% 0 0 0;background:#F3F4F7;border-radius:16px 16px 0 0}
+.gs-t{text-align:center;font-weight:700;padding-top:5%;font-size:1.15em}
+.gs-card{position:absolute;left:6%;right:6%;top:26%;height:52%;background:#fff;border-radius:10px;overflow:hidden}
+.gs-img{position:absolute;left:8%;right:8%;top:5%;height:66%;border-radius:8px;background:repeating-linear-gradient(135deg,#E3E6EE 0 6px,#EEF0F5 6px 12px)}
+.gs-btn{position:absolute;left:6%;right:6%;bottom:6%;height:8%;border-radius:12px;background:#3B82F6;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px}
+.csheet{left:0;right:0;bottom:0;height:66%;background:#FAFAF8;border-radius:16px 16px 0 0;box-shadow:0 -6px 20px rgba(20,24,40,.15)}
+.cs-t{text-align:center;font-weight:700;padding-top:6%;font-size:1.15em}
+.cs-pill{position:absolute;left:6%;right:6%;top:17%;height:10%;border-radius:12px;background:#EEECE8}
+.cs-l{position:absolute;left:8%;top:32%;color:#6B6F7B}
+.cs-opts{position:absolute;left:6%;right:6%;top:39%;background:#fff;border-radius:12px;display:grid}
+.cs-o{position:relative;display:flex;align-items:center;gap:6px;padding:0 7%;height:2.9em;white-space:nowrap}
+.cs-o+.cs-o{border-top:1px solid #EEF0F5}
+.cs-o .ck{position:absolute;right:7%;color:#2563EB;opacity:0;transition:opacity .3s}.cs-o .ck.on{opacity:1}
+.cs-o .ck svg{width:1.5em;height:1.5em}
+.cs-n{position:absolute;left:8%;top:70%;color:#6B6F7B;font-size:.9em}
+.cs-btn{position:absolute;left:6%;right:6%;bottom:6%;height:11%;border-radius:12px}
+.cs-btn span{position:absolute;inset:0;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700}
+.cs-btn .dim{background:#9A9A9A;color:#E8E8E8}.cs-btn .act{background:#1D2130;color:#fff;opacity:0;transition:opacity .3s}.cs-btn .act.on{opacity:1}
+.ptoast{position:absolute;left:50%;top:13%;transform:translateX(-50%);display:flex;align-items:center;gap:5px;background:#1D2130;color:#fff;border-radius:999px;padding:2% 5%;font-weight:700;white-space:nowrap;opacity:0;transition:opacity .3s}
+.ptoast.on{opacity:1}
+.pcur{position:absolute;width:13%;left:50%;top:80%;transition:left .65s ease,top .65s ease;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3));z-index:5}
+.pring{position:absolute;width:22%;aspect-ratio:1;border-radius:50%;border:2.5px solid var(--accent);transform:translate(-50%,-50%) scale(.3);opacity:0;pointer-events:none;z-index:4}
+.pring.go{animation:pr .5s ease-out}
+@keyframes pr{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.3)}}
+.demo.js .pl.pop,.demo.js .pl.gbanner{animation:none}
+.demo.js .pl.pop.on,.demo.js .pl.gbanner.on{opacity:1}
+.demo.js .sw.pl{transition:opacity .3s}
+.demo .toast.js{animation:none;opacity:0;transition:opacity .3s}.demo .toast.js.on{opacity:1}
+.demo.js .pcur{width:5.5%}.demo.js .pring{width:9%}
+.demo-cap{font-size:12px;color:var(--muted);margin:6px 0 10px}
+.share-steps{margin:0;padding-left:1.4em;display:grid;gap:4px;font-size:14.5px}
+.share-steps li::marker{font-family:var(--display);font-weight:800;color:var(--accent)}
+.share-tips{margin:14px 0 0;padding:10px 12px;border-radius:8px;background:var(--sunk);font-size:13.5px;display:grid;gap:4px;list-style:none}
+.share-tips li::before{content:"· "}
+.frame-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 20px;align-items:start}
+@media (max-width:600px){.frame-row{grid-template-columns:minmax(0,1fr)}}
+.frame-picks{display:grid;gap:14px;min-width:0}
+.frame-figs{display:flex;gap:12px;align-items:flex-end}
+.fig{width:150px;aspect-ratio:1/1;max-width:100%;border:1.5px solid var(--ink);border-radius:3px;overflow:hidden;background:var(--sunk);color:var(--ink)}
+.fig-side{width:136px;aspect-ratio:2/1;max-width:100%;color:var(--ink)}
+.fig-wide{width:160px;aspect-ratio:16/9;max-width:100%;border:1.5px solid var(--ink);border-radius:3px;overflow:hidden;background:var(--sunk);color:var(--ink)}
+.fig-wide svg{display:block;width:100%;height:100%}
+@media (max-width:600px){#bg-frame .frame-figs{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);width:100%}#bg-frame .frame-figs .fig-wide,#bg-frame .frame-figs .fig-side{width:100%}}
+.fig svg,.fig-side svg{display:block;width:100%;height:100%}
+@media (max-width:360px){.frame-figs{flex-wrap:wrap}}
+.spot-wrap{width:240px;max-width:100%}.spot-wrap .spot-fig{width:100%}
+.ln{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.ln.thin{stroke-width:1.3} .ln.dash{stroke-dasharray:4 4} .ln.acc{stroke:var(--accent)}
+.ln.face{fill:var(--surface)} .ln.hair{fill:currentColor} .fill-ink{fill:currentColor;stroke:none} .fill-acc{fill:var(--accent);stroke:none}
+.title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.btn-help{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--accent);color:var(--accent);background:var(--surface);border-radius:999px;padding:8px 16px;font-family:var(--display);font-weight:700;font-size:15px;cursor:pointer}
+.btn-help:hover{background:var(--accent-soft)}
+.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,14,30,.45)}
+.modal-box{background:var(--surface);color:var(--ink);border-radius:14px;max-width:560px;width:100%;max-height:calc(100vh - 32px);overflow:auto;padding:22px 22px 18px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.modal-head h2{font-size:20px}
+.modal-x{border:0;background:transparent;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:6px}
+.modal-x:hover{background:var(--sunk)}
+.shot-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.shot-list li{word-break:keep-all;display:flex;gap:10px;align-items:baseline;padding:8px 12px;border-radius:8px;font-size:14.5px;line-height:1.5}
+.shot-list li.o{background:var(--ok-soft)} .shot-list li.x{background:var(--no-soft)}
+.shot-list b{font-family:var(--display);font-weight:800;flex-shrink:0}
+.shot-list li.o b{color:var(--ok)} .shot-list li.x b{color:var(--no)}
+.shot-sub{font-size:14px;margin:14px 0 6px}.modal-head+.shot-sub{margin-top:0}
+.shot-sub.ok{color:var(--ok)} .shot-sub.mid{color:var(--warn)} .shot-sub.no{color:var(--no)}
+.shot-list li.m{background:var(--warn-soft)} .shot-list li.m b{color:var(--warn);font-family:system-ui,sans-serif;font-size:16px;line-height:1}
+.shot-list li.ban{border:2px solid var(--no)} .shot-list li.ban strong{color:var(--no)}
+
+/* 7 결과 확인하기 */
+body[data-screen="1"] .main,body[data-screen="2"] .main,body[data-screen="7"] .main{display:none}
+.fu-pick button{gap:8px}
+.fu-pick button small{font-family:var(--body);font-size:15px;font-weight:600;opacity:.85;word-break:keep-all;text-align:center;line-height:1.4}
+.fu-pick button[aria-checked="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 2px 8px color-mix(in srgb,var(--accent) 30%,transparent)}
+.fu-box{display:grid;gap:14px;border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--slip)}
+.fu-fields{display:grid;gap:14px}
+.fu-fields .f input{background:var(--surface)}
+.fu-box .seg span{background:var(--surface)}
+.fu-grp{display:grid;gap:10px;border-top:1px dashed var(--line);padding-top:12px}
+.fu-grp > b{font-size:14.5px}
+.fu-out .slip{font-size:14.5px;white-space:pre-wrap}
+@media (max-width:520px){.fu-pick button small{font-size:13.5px}}
+@media (max-width:400px){.wiz-nav #wiz-next{white-space:normal;word-break:keep-all;min-width:0;flex:1 1 auto}}
+@media (max-width:760px){.stepper ol{gap:4px}.stepper button{min-width:0}.stepper button[aria-current="step"]{padding:6px 8px;gap:6px}}
+@media (max-width:400px){.stepper ol{gap:3px}.stepper button{padding:4px 3px;min-height:40px}.stepper .sn{width:22px;height:22px;font-size:12px}.stepper button[aria-current="step"]{padding:4px 6px;gap:4px}.stepper button[aria-current="step"] .sl{font-size:12px}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">염경중 2학년 2학기 독서 수행평가 · 북 트레일러 제작 1~3차시 <span class="ver">· 페이지 버전 11.05-1</span></p>
+    <div class="title-row">
+      <h1>AI 이미지 프롬프트 만들기</h1>
+      <div class="help-btns">
+        <button class="btn-help" type="button" id="btn-shots" aria-haspopup="dialog">직접 찍은 컷의 기준이 궁금해요!</button>
+        <button class="btn-help" type="button" id="btn-share" aria-haspopup="dialog">AI와의 대화 내역 제출하는 법</button>
+      </div>
+    </div>
+  </header>
+  <nav class="stepper" aria-label="진행 단계"><ol><li><button type="button" data-go="1"><span class="sn">1</span><span class="sl">시작 전 확인</span></button></li><li><button type="button" data-go="2"><span class="sn">2</span><span class="sl">만들 것 고르기</span></button></li><li><button type="button" data-go="3"><span class="sn">3</span><span class="sl">그림체 고르기</span></button></li><li><button type="button" data-go="4"><span class="sn">4</span><span class="sl">묘사하기</span></button></li><li><button type="button" data-go="5"><span class="sn">5</span><span class="sl">화면 고르기</span></button></li><li><button type="button" data-go="6"><span class="sn">6</span><span class="sl">프롬프트 복사</span></button></li><li><button type="button" data-go="7"><span class="sn">7</span><span class="sl">이미지 다듬기</span></button></li></ol></nav>
+  <div class="modal" id="paste-modal" hidden>
+    <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="paste-title" aria-describedby="paste-desc">
+      <div class="modal-head"><h2 id="paste-title">붙여넣기는 할 수 없습니다</h2><button class="modal-x" type="button" id="paste-close" aria-label="닫기">×</button></div>
+      <p id="paste-desc">묘사는 직접 쓰세요.</p>
+    </div>
+  </div>
+  <div class="modal" id="share-modal" hidden>
+    <div class="modal-box wide" role="dialog" aria-modal="true" aria-labelledby="share-title">
+      <div class="modal-head"><h2 id="share-title">AI와의 대화 내역 제출하는 법</h2><button class="modal-x" type="button" id="share-close" aria-label="닫기">×</button></div>
+      <div class="ai-tabs" role="tablist"><button type="button" role="tab" id="ai-tab-0" aria-selected="true">ChatGPT</button><button type="button" role="tab" id="ai-tab-1" aria-selected="false">Gemini</button><button type="button" role="tab" id="ai-tab-2" aria-selected="false">Claude</button></div>
+      <div class="ai-panel" id="ai-panel-0" role="tabpanel"><div class="demo-pair"><div class="demo js" data-steps='[{"t": "share", "on": ["banner"], "hold": 1}]'><div class="bar"><span class="ttl"></span></div><div class="msg m1"></div><div class="msg m2"></div><div class="msg m3"></div><div class="pic"></div><div class="tb" data-t="share" style="right:3%;width:13%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>공유</div><div class="gbanner pl" data-layer="banner"><span class="gb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.8"/></svg></span><span class="gb-tx"><b>공개 링크가 복사되었습니다</b><span>링크가 있으면 누구나 이 대화를 볼 수 있습니다.</span></span><span class="gb-btn">링크 관리</span></div><span class="pring"></span><svg class="pcur" viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1 3.8 7.2-2.6 1.3-3.7-7.3L5 20z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg></div><div class="demo phone2" data-steps='[{"t": "more", "on": ["menu"]}, {"t": "share", "off": ["menu"], "on": ["gsheet"]}, {"t": "lshare", "off": ["gsheet"], "on": ["ios"]}, {"t": "copy", "off": ["ios"], "toast": 1}]' data-init="only"><div class="ph-top"><span class="ph-ham">☰</span><span class="ph-more" data-t="more">⋯</span></div><div class="msg" style="right:8%;top:15%;width:60%;height:7%;background:#E8ECFB"></div><div class="msg" style="left:8%;top:26%;width:80%;height:7%"></div><div class="msg" style="left:8%;top:36%;width:64%;height:7%"></div><div class="pic" style="left:8%;top:47%;width:46%;height:20%"></div><div class="pl pmenu2" data-layer="menu"><div class="it hl" data-t="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>공유</div><div class="it">이름 바꾸기</div><div class="it">삭제</div></div><div class="pl gsheet" data-layer="gsheet"><div class="gs-t">채팅 링크 공유</div><span class="ph" style="top:12%;width:84%"></span><span class="ph" style="top:18%;width:70%"></span><div class="gs-card"><div class="gs-img"></div><span class="ph" style="top:80%;width:50%"></span><span class="ph" style="top:89%;width:30%"></span></div><div class="gs-btn" data-t="lshare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>링크 공유</div></div><div class="pl ios" data-layer="ios"><div class="ios-in" data-t="sheet"><div class="ios-link"><i></i><span><b></b><em></em></span></div><div class="ios-row"><span class="c"></span><span class="c"></span><span class="c"></span><span class="c"></span></div><div class="ios-row"><span class="a"></span><span class="a"></span><span class="a"></span><span class="a"></span></div><div class="ios-row act"><span class="cp" data-t="copy"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></i>복사</span><span><i></i></span><span><i></i></span><span><i></i></span></div><div class="ios-list"><span></span><span></span><span></span></div></div></div><div class="ptoast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>링크 복사됨</div><span class="pring"></span><svg class="pcur" viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1 3.8 7.2-2.6 1.3-3.7-7.3L5 20z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg></div></div><p class="demo-cap">컴퓨터(웹) 화면과 휴대폰(아이폰) 앱 화면 예시. 안드로이드는 공유 창 모양이 조금 다름. 실제 화면 모양과 버튼 이름은 업데이트에 따라 조금 다를 수 있음</p><ol class="share-steps"><li>대화 화면 오른쪽 위 <b>공유</b> 누르기</li><li>'공개 링크가 복사되었습니다' 알림이 뜨면 복사 끝</li><li>구글 클래스룸 과제에 링크 붙여 넣기 (추가 → 링크)</li></ol><p class="phone-steps"><b>휴대폰 앱</b>: 오른쪽 위 <b>⋯</b> → <b>공유</b> → <b>링크 공유</b> → 공유 창에서 <b>복사</b></p></div><div class="ai-panel" id="ai-panel-1" role="tabpanel" hidden><div class="demo-pair"><div class="demo js gem2" data-init="lim" data-steps='[{"t": "more", "on": ["menu"]}, {"t": "drive", "off": ["menu"], "on": ["conn"]}, {"t": "cont", "off": ["conn"], "on": ["sh"]}, {"t": "acc", "on": ["dd"]}, {"t": "school", "off": ["dd", "lim"], "on": ["sch"]}, {"t": "copy", "toast": 1}, {"t": "done", "off": ["sh"]}]'><div class="bar"><span class="ttl"></span></div><div class="msg m1"></div><div class="msg m2"></div><div class="msg m3"></div><div class="pic"></div><div class="tb dots" data-t="more" style="right:2.5%">⋮</div><div class="pop pl g2menu" data-layer="menu"><div class="it hl" data-t="drive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Drive를 통해 공유</div><div class="it">이 채팅의 파일</div><div class="it">고정</div><div class="it">이름 변경</div><div class="it">PDF 다운로드</div><div class="it">Docs로 내보내기</div><div class="it">삭제</div></div><div class="pop pl g2conn" data-layer="conn"><div class="g2c-ic">△</div><div class="g2c-t">Google Drive에 연결</div><div class="g2c-s">계속 진행하면 공유된 채팅이 Google Drive의 Gemini 대화 폴더에 저장됩니다.</div><div class="g2c-b"><span>취소</span><b data-t="cont">계속</b></div></div><div class="pop pl g2sh" data-layer="sh"><div class="g2s-t">"[Gemini Conversation] …" 공유</div><div class="g2s-in">사용자, 그룹 추가</div><div class="g2s-l" style="top:37%">액세스 권한이 있는 사용자</div><div class="g2s-me"><i>나</i><span>나 (you)</span><em>소유자</em></div><div class="g2s-l" style="top:63%">일반 액세스</div><div class="g2s-acc" data-t="acc"><span class="g2a pl" data-layer="lim"><i class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></i><span><b>제한됨 ▾</b><small>액세스 권한이 있는 사용자만 열 수 있음</small></span></span><span class="g2a pl" data-layer="sch"><i class="sc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2"/></svg></i><span><b>염경중학교 ▾</b><small>링크가 있는 이 그룹의 모든 사용자가 볼 수 있음</small></span><em>뷰어</em></span></div><div class="g2s-f"><span class="g2s-cp" data-t="copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>링크 복사</span><b data-t="done">완료</b></div></div><div class="pop pl g2dd" data-layer="dd"><div>✓ 제한됨</div><div class="hl" data-t="school">염경중학교</div><div>링크가 있는 모든 사용자</div></div><div class="toast js"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>링크 복사됨</div><span class="pring"></span><svg class="pcur" viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1 3.8 7.2-2.6 1.3-3.7-7.3L5 20z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg></div><div class="demo phone2" data-steps='[{"t": "more", "on": ["menu"]}, {"t": "share", "off": ["menu"], "on": ["ios"]}, {"drag": 1, "on": ["scrolled"]}, {"t": "copy", "off": ["ios", "scrolled"], "toast": 1}]' data-init="only"><div class="ph-top"><span class="ph-ham">☰</span><span class="ph-more" data-t="more">⋯</span></div><div class="msg" style="right:8%;top:15%;width:60%;height:7%;background:#E8ECFB"></div><div class="msg" style="left:8%;top:26%;width:80%;height:7%"></div><div class="msg" style="left:8%;top:36%;width:64%;height:7%"></div><div class="pic" style="left:8%;top:47%;width:46%;height:20%"></div><div class="pl pmenu2" data-layer="menu"><div class="it hl" data-t="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>공유</div><div class="it">이름 바꾸기</div><div class="it">삭제</div></div><div class="pl gcard" data-layer="ios"><b>대화의 공개 링크</b><span>share.gemini.google</span></div><div class="pl ios tall" data-layer="ios"><div class="ios-in" data-t="sheet"><div class="ios-link"><i></i><span><b></b><em></em></span></div><div class="ios-row"><span class="c"></span><span class="c"></span><span class="c"></span><span class="c"></span></div><div class="ios-row"><span class="a"></span><span class="a"></span><span class="a"></span><span class="a"></span></div><div class="ios-row act"><span class="cp" data-t="copy"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></i>복사</span><span><i></i></span><span><i></i></span><span><i></i></span></div><div class="ios-list"><span></span><span></span><span></span></div></div></div><div class="ptoast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>링크 복사됨</div><span class="pring"></span><svg class="pcur" viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1 3.8 7.2-2.6 1.3-3.7-7.3L5 20z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg></div></div><p class="demo-cap">컴퓨터(웹) 화면과 휴대폰(아이폰) 앱 화면 예시. 안드로이드는 공유 창 모양이 조금 다름. 실제 화면 모양과 버튼 이름은 업데이트에 따라 조금 다를 수 있음</p><p class="share-warn"><b>꼭!</b> '일반 액세스'를 <b>염경중학교</b>로 바꾸기. '제한됨'을 그대로 두면 선생님이 링크를 열 수 없음</p><ol class="share-steps"><li>대화 화면 오른쪽 위 <b>⋮</b>(더보기) 누르기</li><li><b>Drive를 통해 공유</b> 누르기</li><li>'Google Drive에 연결' 창에서 <b>계속</b> 누르기</li><li>'일반 액세스'의 <b>제한됨 ▾</b>을 눌러 <b>염경중학교</b>로 바꾸기</li><li><b>링크 복사</b> 누르고 <b>완료</b> 누르기</li><li>구글 클래스룸 과제에 링크 붙여 넣기 (추가 → 링크)</li></ol><p class="phone-steps"><b>휴대폰 앱</b>: 오른쪽 위 <b>⋯</b> → <b>공유</b> → 뜬 공유 창을 <b>위로 한 번 밀기</b> → <b>복사</b></p></div><div class="ai-panel" id="ai-panel-2" role="tabpanel" hidden><div class="demo-pair"><div class="demo js" data-init="only" data-steps='[{"t": "share", "on": ["q1"]}, {"t": "gear", "off": ["q1"], "on": ["q2"]}, {"t": "sel", "off": ["only"], "on": ["any"]}, {"t": "save", "off": ["q2"], "on": ["q1"]}, {"t": "copy", "off": ["q1"], "toast": 1}]'><div class="bar"><span class="ttl"></span></div><div class="msg m1"></div><div class="msg m2"></div><div class="msg m3"></div><div class="pic"></div><div class="tb" data-t="share" style="right:3%;width:13%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>공유</div><div class="pop pl cdlg" data-layer="q1" style="left:22%;top:6%;width:56%;height:90%"><div class="cd-t">세션 공유<span>×</span></div><div class="cd-s">지금까지의 메시지만 공유됩니다</div><div class="cd-in"><span>이메일로 사람 추가</span><b>초대하기</b></div><div class="cd-l">액세스 권한이 있는 사용자</div><div class="cd-row cd-acc"><span class="sw a pl" data-layer="only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>초대받은 사람만</span><span class="sw b pl" data-layer="any"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>링크가 있는 모든 사람</span><span class="cd-gt">›</span></div><div class="cd-row cd-me"><i>나</i>나 (본인)<span class="cd-r">관리자</span></div><span class="ph" style="top:76%;width:80%"></span><div class="cd-hr"></div><div class="cd-foot"><i data-t="gear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></svg></i><b data-t="copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>링크 복사</b></div></div><div class="pop pl cdlg" data-layer="q2" style="left:22%;top:6%;width:56%;height:90%"><div class="cd-t">‹&nbsp; 채팅 공유 설정<span>×</span></div><div class="cd-s" style="top:15%">액세스 권한이 있는 사용자</div><div class="cd-sel" data-t="sel"><span class="sw a pl" data-layer="only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>초대받은 사람만</span><span class="sw b pl" data-layer="any"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>링크가 있는 모든 사람</span><span class="cd-gt">⌄</span></div><div class="cd-box"><span class="ph" style="top:14%;width:80%"></span><span class="ph" style="top:40%;width:70%"></span><span class="ph" style="top:66%;width:76%"></span></div><div class="cd-f2"><span class="stop">공유 중지</span><span class="bk">뒤로</span><b data-t="save">저장</b></div></div><div class="toast js"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>링크가 복사되었습니다</div><span class="pring"></span><svg class="pcur" viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1 3.8 7.2-2.6 1.3-3.7-7.3L5 20z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg></div><div class="demo phone2" data-steps='[{"t": "more", "on": ["menu"]}, {"t": "share", "off": ["menu"], "on": ["csheet"]}, {"t": "any", "off": ["only"], "on": ["any"]}, {"t": "lshare", "off": ["csheet"], "on": ["ios"]}, {"t": "copy", "off": ["ios"], "toast": 1}]' data-init="only"><div class="ph-top"><span class="ph-ham">☰</span><span class="ph-more" data-t="more">⋯</span></div><div class="msg" style="right:8%;top:15%;width:60%;height:7%;background:#E8ECFB"></div><div class="msg" style="left:8%;top:26%;width:80%;height:7%"></div><div class="msg" style="left:8%;top:36%;width:64%;height:7%"></div><div class="pic" style="left:8%;top:47%;width:46%;height:20%"></div><div class="pl pmenu2" data-layer="menu"><div class="it hl" data-t="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>공유</div><div class="it">이름 바꾸기</div><div class="it">삭제</div></div><div class="pl csheet" data-layer="csheet"><div class="cs-t">공유</div><div class="cs-pill"></div><div class="cs-l">접근 권한이 있는 사용자</div><div class="cs-opts"><div class="cs-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>나만 접근 가능<i class="ck only" data-layer="only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></i></div><div class="cs-o" data-t="any"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>링크가 있는 모든 사용자<i class="ck" data-layer="any"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></i></div></div><div class="cs-n">이 시점까지의 메시지만 공유됩니다</div><div class="cs-btn" data-t="lshare"><span class="dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>링크 공유</span><span class="act" data-layer="any"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>링크 공유</span></div></div><div class="pl ios" data-layer="ios"><div class="ios-in" data-t="sheet"><div class="ios-link"><i></i><span><b></b><em></em></span></div><div class="ios-row"><span class="c"></span><span class="c"></span><span class="c"></span><span class="c"></span></div><div class="ios-row"><span class="a"></span><span class="a"></span><span class="a"></span><span class="a"></span></div><div class="ios-row act"><span class="cp" data-t="copy"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></i>복사</span><span><i></i></span><span><i></i></span><span><i></i></span></div><div class="ios-list"><span></span><span></span><span></span></div></div></div><div class="ptoast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>링크 복사됨</div><span class="pring"></span><svg class="pcur" viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1 3.8 7.2-2.6 1.3-3.7-7.3L5 20z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg></div></div><p class="demo-cap">컴퓨터(웹) 화면과 휴대폰(아이폰) 앱 화면 예시. 안드로이드는 공유 창 모양이 조금 다름. 실제 화면 모양과 버튼 이름은 업데이트에 따라 조금 다를 수 있음</p><p class="share-warn"><b>꼭!</b> 공유 설정을 <b>링크가 있는 모든 사람</b>으로 바꾸기. 바꾸지 않으면 '초대받은 사람만' 열 수 있어서 선생님이 링크를 열 수 없음. 휴대폰 앱에서는 '링크가 있는 모든 사용자'를 고르기</p><ol class="share-steps"><li>대화 화면 오른쪽 위 <b>공유</b> 누르기</li><li>창 아래 <b>링크 복사</b> 옆 <b>⚙</b>(공유 설정) 누르기</li><li>'액세스 권한이 있는 사용자'를 <b>링크가 있는 모든 사람</b>으로 바꾸고 <b>저장</b> 누르기</li><li><b>링크 복사</b> 누르기</li><li>구글 클래스룸 과제에 링크 붙여 넣기 (추가 → 링크)</li></ol><p class="phone-steps"><b>휴대폰 앱</b>: 오른쪽 위 <b>⋯</b> → <b>공유</b> → <b>링크가 있는 모든 사용자</b> 고르기 → <b>링크 공유</b> → 공유 창에서 <b>복사</b></p></div>
+      <ul class="share-tips">
+        <li>인물·장소마다 대화가 하나씩이므로, 링크도 대화마다 하나씩 만들기</li>
+        <li>다시 만들기까지 모두 끝낸 뒤 마지막에 링크 만들기. 링크를 만든 뒤 이어서 나눈 대화는 링크에 들어가지 않음</li>
+        <li>링크를 만든 뒤 대화를 더 했다면 링크를 다시 만들어 그 링크를 내기</li>
+        <li>대화와 링크는 채점이 끝날 때까지 지우지 않기</li>
+        <li>공유 버튼이 안 보이면 선생님께 알리기 (학교 계정은 공유가 막혀 있을 수 있음)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="modal" id="shots-modal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="shots-title">
+      <div class="modal-head"><h2 id="shots-title">직접 찍은 컷 (3개 이상 필수)</h2><button class="modal-x" type="button" id="shots-close" aria-label="닫기">×</button></div>
+      <h3 class="shot-sub ok">직접 찍은 컷으로 인정</h3><ul class="shot-list"><li class="o"><b>O</b><span>폰으로 찍은 손·사물 영상 (책 넘기는 손, 소품, 실물 책 표지)</span></li><li class="o"><b>O</b><span>사람이 나오는 영상 (손·뒷모습 권장, 얼굴은 권장하지 않음)</span></li><li class="o"><b>O</b><span>종이에 그린 손그림·손글씨를 찍은 영상 (그리는 과정, 완성본)</span></li><li class="o"><b>O</b><span>손그림·손글씨를 사진이나 스캔 파일로 넣은 것</span></li><li class="o"><b>O</b><span>태블릿 그림 앱의 타임랩스·화면 녹화, 완성 그림</span></li><li class="o"><b>O</b><span>직접 찍어 이어 붙인 스톱모션</span></li></ul><h3 class="shot-sub mid">영상에 넣어도 되지만, 직접 찍은 컷은 아님</h3><ul class="shot-list"><li class="m"><b>△</b><span>AI로 만든 이미지</span></li><li class="m"><b>△</b><span>인터넷에서 받은 이미지·영상 (표지 이미지 검색 포함)</span></li></ul><h3 class="shot-sub no">부정행위</h3><ul class="shot-list"><li class="x ban"><b>X</b><span><strong>AI로 만든 영상</strong> (영상 생성 AI 사용 금지)</span></li></ul>
+    </div>
+  </div>
+
+  <section class="step screen" data-screen="1" aria-labelledby="h-s1">
+    <div class="step-head"><h2 id="h-s1">시작 전 확인하기</h2><p class="step-sub">아래 약속을 하나씩 읽고 모두 체크하면 다음으로 넘어갈 수 있습니다.</p></div>
+    <ul class="pledge" aria-labelledby="h-s1">
+      <li><label for="pledge-0"><input type="checkbox" id="pledge-0" data-pledge="0"><span>AI로는 정지된 인물·배경 이미지만 만듭니다. (영상 생성 금지)</span></label></li>
+      <li><label for="pledge-1"><input type="checkbox" id="pledge-1" data-pledge="1"><span>인물끼리는 같은 그림체, 배경끼리는 같은 그림체를 씁니다.</span></label></li>
+      <li><label for="pledge-2"><input type="checkbox" id="pledge-2" data-pledge="2"><span id="pledge-chat">같은 인물은 하나의 대화창에서 생성하고, 새로운 인물은 새 대화창을 열어 생성해야 합니다.</span></label></li>
+      <li><label for="pledge-3"><input type="checkbox" id="pledge-3" data-pledge="3"><span>한 이미지에 대한 수정 요청은 3번 이상 하지 않는 것을 권장합니다. (지나치게 많이 시도하면 다른 이미지를 생성하지 못할 수 있어요)</span></label></li>
+      <li><label for="pledge-4"><input type="checkbox" id="pledge-4" data-pledge="4"><span>AI와 나눈 대화는 지우지 않고, 대화마다 공유 링크를 만들어 영상과 함께 제출합니다.</span></label></li>
+      <li><label for="pledge-5"><input type="checkbox" id="pledge-5" data-pledge="5"><span>엔딩 크레딧에 내가 활용한 AI 도구와 AI로 생성한 이미지 목록을 적습니다.</span></label></li>
+    </ul>
+  </section>
+  <section class="step screen" data-screen="2" aria-labelledby="h-s2">
+    <div class="step-head"><h2 id="h-s2">만들 것 고르기</h2><p class="step-sub">인물 한 명 또는 장소 한 곳을 고릅니다. 다 만든 뒤 다시 여기로 돌아와 다음 인물·장소를 만듭니다.</p></div>
+  <div class="tabs pick" role="tablist" aria-label="만들 이미지">
+    <button role="tab" id="tab-character" aria-controls="panel-character" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>인물 만들기</button>
+    <button role="tab" id="tab-background" aria-controls="panel-background" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg>배경 만들기</button>
+  </div>
+  </section>
+
+  <div class="main">
+    <div class="col">
+      <!-- 1 그림체 -->
+      <section class="step screen" data-screen="3" aria-labelledby="h-preset">
+        <div class="step-head">
+          <span class="step-no">1단계</span><h2 id="h-preset">그림체 고르기</h2>
+          <p class="step-sub">인물끼리 / 배경끼리는 같은 그림체를 씁니다. (인물과 배경 그림체는 서로 달라도 됩니다)</p>
+        </div>
+        <div class="presets" id="presets" role="radiogroup" aria-labelledby="h-preset"></div>
+        <div class="preview" id="preview" hidden aria-live="polite">
+          <div class="preview-txt">
+            <p class="pv-name" id="pv-name"></p>
+            <p class="fs13 muted" id="pv-ds"></p>
+          </div>
+          <div class="pv-imgs">
+            <figure class="pv-fig ch-fig"><figcaption>인물</figcaption><div class="preview-img ch" id="pv-img"></div></figure>
+            <figure class="pv-fig"><figcaption>배경</figcaption><div class="preview-img bg" id="pv-bg"></div></figure>
+          </div>
+          <p class="fs13">『어린 왕자』의 인물과 장소를 이 그림체로 만든 예시입니다. 실제 결과는 내가 쓴 묘사에 따라 달라집니다.</p>
+        </div>
+        <div class="modal" id="preset-modal" hidden>
+        <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="preset-title">
+          <div class="modal-head"><h2 id="preset-title">그림체가 달라졌습니다</h2><button class="modal-x" type="button" id="preset-close" aria-label="닫기">×</button></div>
+          <div class="alert warn" id="preset-warn">
+          <p>앞에서 <span class="lock-kind"></span>을 <b id="locked-name"></b> 만들었습니다. <span class="lock-kind"></span>끼리는 그림체 하나만 씁니다. 다른 그림체로 만들면 앞에서 만든 <span class="lock-kind"></span>과 어울리지 않습니다.</p>
+          <div class="btns">
+            <button class="btn" id="btn-revert" type="button"></button>
+            <button class="btn ghost" id="btn-reset" type="button">그림체 바꾸고 <span class="lock-kind"></span> 모두 다시 만들기</button>
+          </div>
+          <p class="fs13" id="reset-confirm" hidden>정말 바꿀까요? 지금까지 만든 <span class="lock-kind"></span>을 새 그림체로 <b>모두 다시</b> 만들어야 합니다.
+            <button class="btn small" id="btn-reset-yes" type="button">네, 바꿉니다</button>
+            <button class="btn small ghost" id="btn-reset-no" type="button">취소</button></p>
+          </div>
+        </div>
+        </div>
+      </section>
+
+      <!-- 인물 -->
+      <div id="panel-character" role="tabpanel" aria-labelledby="tab-character" class="col">
+        <section class="step screen" data-screen="4" aria-labelledby="h-ch">
+          <div class="step-head">
+            <span class="step-no">2단계</span><h2 id="h-ch">인물 묘사하기</h2>
+            <p class="step-sub">책을 읽고 떠올린 모습을 직접 씁니다. 한 번에 한 명만 만듭니다. <b>모든 칸이 필수</b>입니다.</p>
+            <p class="note"><b>한 인물은 한 대화창에서</b> 확인·고치기·다시 만들기까지 끝냅니다.<br><b>새로운 인물은 새 대화</b>를 열어 요청합니다.<br>같은 대화에서 이어 만들면 먼저 생성한 그림의 영향을 받기 때문에 의도한 대로 결과물이 나오지 않을 수 있습니다.</p>
+          </div>
+          <div class="row-btns">
+            <button class="btn small ghost" type="button" id="ch-clear">칸 비우고 다시 작성하기 (새로운 인물 작성하기)</button>
+          </div>
+          <div class="alert warn" id="ch-confirm" hidden role="alertdialog" aria-labelledby="ch-confirm-msg">
+            <p id="ch-confirm-msg"><strong>지금 쓴 인물 묘사가 모두 지워집니다.</strong> 정말 비울까요? 지운 내용은 되돌릴 수 없습니다.</p>
+            <div class="btns"><button class="btn" type="button" id="ch-confirm-yes">네, 모두 지우기</button><button class="btn ghost" type="button" id="ch-confirm-no">취소</button></div>
+          </div>
+          <div class="fields">
+            <fieldset class="f wide"><legend class="legend">인물 종류</legend>
+              <div class="seg" id="seg-kind"></div>
+            </fieldset>
+            <div class="f" id="f-ch-name"><label for="ch-name">인물 이름 <small>필수</small></label><input id="ch-name" autocomplete="off" placeholder="예: 어린 왕자"></div>
+            <div class="f"><label for="ch-age">나이, 성별</label><input id="ch-age" autocomplete="off" placeholder="예: 열 살쯤 된 남자아이"></div>
+            <div class="f wide" id="f-kinddesc"><label for="ch-kinddesc" id="kinddesc-label">어떤 존재인지 설명해 주세요</label><input id="ch-kinddesc" autocomplete="off"><span class="hint" id="kind-hint"></span></div>
+            <div class="f wide"><label for="ch-look">생김새 <small>얼굴·머리·체형 · <b class="no-real">연예인·친구 이름, "OO 닮게" 금지</b></small></label><textarea id="ch-look" placeholder="예: 작고 마른 몸, 금빛 곱슬머리"></textarea><span class="hint"><b>책에 생김새 묘사가 없으면 책 내용에 어울리게 상상해서 써도 됩니다.</b></span></div>
+            <div class="f wide"><label for="ch-outfit">옷차림</label><textarea id="ch-outfit" placeholder="예: 발목까지 오는 깃 높은 코트, 목에 두른 긴 목도리"></textarea><span class="hint" id="outfit-hint">머리부터 신발까지 전부 자세하게 쓰기.</span></div>
+            <div class="f"><label for="ch-person">성격</label><input id="ch-person" autocomplete="off" placeholder="예: 궁금한 것은 끝까지 묻는 고집 있는 성격"></div>
+            <div class="f"><label for="ch-pose">표정과 자세</label><input id="ch-pose" autocomplete="off" placeholder="예: 고개를 살짝 기울이고 무언가 묻는 듯한 얼굴"></div>
+            <div class="f wide"><label for="ch-key">꼭 보여야 할 소품</label><input id="ch-key" autocomplete="off" placeholder="예: 바람에 날리는 목도리"><span class="hint">여기에 쓴 것 말고는 소품이 들어가지 않습니다. 소품이 많으면 인물이 작아지고 배경 지우기가 어려워지니 꼭 필요한 것만 쓰기. <b>없다면 '없음'이라고 쓰세요.</b></span></div>
+          </div>
+        </section>
+
+        <section class="step screen" data-screen="5" aria-labelledby="h-ch2">
+          <div class="step-head"><span class="step-no">3단계</span><h2 id="h-ch2">화면 고르기</h2></div>
+          <div class="frame-row">
+            <div class="frame-picks">
+          <fieldset><legend class="legend">샷</legend>
+            <div class="seg" id="seg-shot"></div><span class="hint" id="shot-note"></span></fieldset>
+          <fieldset><legend class="legend">방향</legend>
+            <div class="seg" id="seg-dir"></div></fieldset>
+          <fieldset><legend class="legend">카메라 높이</legend>
+            <div class="seg" id="seg-height"></div><span class="hint" id="height-note"></span></fieldset>
+            </div>
+            <div class="frame-figs" aria-hidden="true">
+              <div><div class="fig" id="ch-mini"></div><div class="mini-cap">완성 그림 예시</div></div>
+              <div><div class="fig-side" id="ch-side"></div><div class="mini-cap">옆에서 본 카메라</div></div>
+            </div>
+          </div>
+          <p class="note" id="dir-note"></p>
+        </section>
+
+        <section class="step screen" data-screen="6" aria-labelledby="h-ch-ox">
+          <div class="step-head"><h2 id="h-ch-ox">헷갈리기 쉬운 내용을 정리해 드립니다</h2><p class="step-sub">프롬프트를 복사하기 전, 다시 한 번 확인해 보세요!</p></div>
+          <div class="ox">
+            <div class="ox-row"><div class="o"><b>O</b>책을 읽고 떠올린 생김새를 칸마다 쓰기</div><div class="x"><b>X</b>책 제목만 주고 "주인공 그려 줘"</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>책에 없는 생김새는 책 내용에 어울리게 상상해서 쓰기</div><div class="x"><b>X</b>책 내용과 어긋나는 모습 지어내기</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>옷차림은 머리부터 신발까지 전부 쓰기</div><div class="x"><b>X</b>"교복"처럼 한 단어로만 쓰기</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>책을 참고하여 직접 묘사한 얼굴</div><div class="x"><b>X</b>연예인·친구 이름, "OO 닮게"</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>성격은 표정·자세로 표현하기 ("고개를 들고 상대를 똑바로 보는")</div><div class="x"><b>X</b>성격 단어만 입력하기 ("착함", "소심함")</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>인물마다 따로 요청하기</div><div class="x"><b>X</b>여러 명을 한 번에 요청하기</div></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 배경 -->
+      <div id="panel-background" role="tabpanel" aria-labelledby="tab-background" class="col" hidden>
+        <section class="step screen" data-screen="4" aria-labelledby="h-bg">
+          <div class="step-head">
+            <span class="step-no">2단계</span><h2 id="h-bg">장소 묘사하기</h2>
+            <p class="step-sub">책을 참고하여 책 속 장소를 직접 묘사합니다. 한 번에 장소 한 곳만 만듭니다. <b>모든 칸이 필수</b>입니다.</p>
+            <p class="note"><b>한 장소는 한 대화창에서</b> 확인·고치기·다시 만들기까지 끝냅니다.<br>장소가 여러 곳일 경우, 기존 대화창에서 계속 작업하지 않고 <b>새로운 대화창</b>을 열어 새로운 프롬프트를 붙여 넣습니다.<br>같은 대화에서 이어 만들면 먼저 생성한 그림의 영향을 받기 때문에 의도한 대로 결과물이 나오지 않을 수 있습니다.</p>
+          </div>
+          <div class="row-btns">
+            <button class="btn small ghost" type="button" id="bg-clear">칸 비우고 다시 작성하기 (새로운 장소 작성하기)</button>
+          </div>
+          <div class="alert warn" id="bg-confirm" hidden role="alertdialog" aria-labelledby="bg-confirm-msg">
+            <p id="bg-confirm-msg"><strong>지금 쓴 장소 묘사가 모두 지워집니다.</strong> 정말 비울까요? 지운 내용은 되돌릴 수 없습니다.</p>
+            <div class="btns"><button class="btn" type="button" id="bg-confirm-yes">네, 모두 지우기</button><button class="btn ghost" type="button" id="bg-confirm-no">취소</button></div>
+          </div>
+          <div id="places" class="col"></div>
+        </section>
+
+        <section class="step screen" data-screen="5" aria-labelledby="h-bg2">
+          <div class="step-head"><span class="step-no">3단계</span><h2 id="h-bg2">화면 고르기</h2></div>
+          <div id="bg-frame" class="col"></div>
+        </section>
+
+        <section class="step screen" data-screen="6" aria-labelledby="h-bg-ox">
+          <div class="step-head"><h2 id="h-bg-ox">헷갈리기 쉬운 내용을 정리해 드립니다</h2><p class="step-sub">프롬프트를 복사하기 전, 다시 한 번 확인해 보세요!</p></div>
+          <div class="ox">
+            <div class="ox-row"><div class="o"><b>O</b>책에 없는 장소 모습은 책 내용에 어울리게 상상해서 쓰기</div><div class="x"><b>X</b>책 내용과 어긋나는 장소 지어내기</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>장소 전체가 보이는 그림</div><div class="x"><b>X</b>사물 하나를 크게 → 직접 찍는 컷으로</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>사람이 있던 흔적 (빈 의자, 놓인 가방)</div><div class="x"><b>X</b>배경에 인물이 들어가도록 묘사하기</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>글자는 편집에서 자막으로</div><div class="x"><b>X</b>간판·칠판 글씨를 그림 속에</div></div>
+            <div class="ox-row"><div class="o"><b>O</b>배경에 인물이 위치한다면 아이 레벨</div><div class="x"><b>X</b>하이·로 앵글 배경에 정면 인물 올리기</div></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- 결과 -->
+    <aside class="out screen" data-screen="6" aria-labelledby="h-out">
+      <div class="out-card">
+        <div class="label"><h2 id="h-out">프롬프트</h2><span class="fs13 muted" id="out-kind">인물 · 대화형 AI에 붙여넣기</span></div>
+        <div class="status empty" id="status"></div>
+        <div class="alert warn" id="out-warn" hidden><p><strong>그림체를 먼저 선택하세요.</strong> 1단계 안내를 보고 그림체를 선택해야 합니다. 모든 <span class="lock-kind"></span>의 그림체는 같아야 합니다.</p></div>
+        <button class="btn primary" type="button" id="copy">프롬프트 복사</button>
+        <details class="slip-wrap"><summary>프롬프트 내용 보기</summary><pre class="slip" id="slip" tabindex="0" aria-label="완성된 프롬프트"></pre></details>
+      </div>
+      <div class="out-card">
+        <h3>복사한 다음</h3>
+        <ol class="next" id="next"></ol>
+      </div>
+      <div class="out-card">
+        <div class="label"><h3>지금까지 생성&amp;복사한 프롬프트</h3><span class="fs13 muted" id="made-preset"></span></div>
+        <div class="made" id="made"><span class="fs13 muted">아직 없습니다.</span></div>
+        <p class="note" id="lineup" hidden>인물을 모두 만든 뒤 한 화면에 나란히 놓고, 같은 이야기 속 인물로 보이는지 점검하기. 아니면 다시 만들 때 옷과 머리 색을 그림체의 색 이름으로 바꿔 쓰기.</p>
+      </div>
+    </aside>
+  </div>
+  <section class="step screen" data-screen="7" aria-labelledby="h-s7">
+    <div class="step-head"><h2 id="h-s7">이미지 다듬기</h2>
+      <p class="step-sub">프롬프트로 이미지를 생성했나요? 이미지를 수정하거나 추가 생성하고 싶다면, <b>긴 프롬프트를 다시 보내지 말고 같은 대화창에 수정 사항/요청 사항만 간단히</b> 써 보세요.</p></div>
+    <div class="tabs pick fu-pick" role="radiogroup" aria-label="첫 이미지 결과">
+      <button type="button" role="radio" id="fu-like" aria-checked="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16.5 9"/></svg>마음에 들어요<small>같은 <span class="fu-w">인물</span>로 다른 장면 만들기</small></button>
+      <button type="button" role="radio" id="fu-fix" aria-checked="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>마음에 들지 않아요<small>고칠 점만 적어 다시 만들기</small></button>
+    </div>
+    <div class="fu-box" id="fu-like-box" hidden>
+      <fieldset><legend class="legend">무엇을 바꿀까요? <small>여러 개 골라도 됨</small></legend><div class="seg multi" id="fu-what"></div></fieldset>
+      <div class="fu-fields" id="fu-fields"></div>
+      <p class="note" id="fu-like-note"></p>
+    </div>
+    <div class="fu-box" id="fu-fix-box" hidden>
+      <div class="f"><label for="fu-fix-text">고칠 점 <small>바꿀 부분만, 한 줄에 하나씩</small></label><textarea id="fu-fix-text" rows="3"></textarea><p class="hint">잘 나온 부분은 다시 쓰지 않기. 한 이미지에 대한 수정 요청은 3번 이상 하지 않기 (너무 많이 시도하면 다른 이미지를 생성하지 못할 수 있음).</p></div>
+    </div>
+    <div class="out-card fu-out" id="fu-out" hidden>
+      <div class="label"><h3>같은 대화창에 보낼 요청</h3><span class="fs13 muted">복사해서 지금 대화창에 붙여 넣기</span></div>
+      <div class="status empty" id="fu-status" hidden></div>
+      <pre class="slip" id="fu-slip" hidden></pre>
+      <button class="btn primary" type="button" id="fu-copy">요청 복사</button>
+    </div>
+    <div class="ox" aria-label="헷갈리기 쉬운 것">
+      <div class="ox-row"><div class="o"><b>O</b>같은 대화창에 짧게 요청하기</div><div class="x"><b>X</b>프롬프트를 처음부터 다시 만들어 붙여 넣기</div></div>
+      <div class="ox-row"><div class="o"><b>O</b>바꿀 부분만 적기</div><div class="x"><b>X</b>잘 나온 부분까지 다시 설명하기</div></div>
+      <div class="ox-row"><div class="o"><b>O</b><span id="fu-ox-o">다른 인물은 새 대화창에서 만들기</span></div><div class="x"><b>X</b><span id="fu-ox-x">이 대화창에서 다른 인물 만들기</span></div></div>
+    </div>
+  </section>
+  <p class="toast toast-float" id="toast" role="status" aria-live="polite" hidden></p>
+  <div class="modal" id="wiz-msg" hidden>
+    <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="wiz-msg-title" aria-describedby="wiz-msg-text">
+      <div class="modal-head"><h2 id="wiz-msg-title">아직 넘어갈 수 없습니다</h2><button class="modal-x" type="button" id="wiz-msg-close" aria-label="닫기">×</button></div>
+      <p id="wiz-msg-text" class="wiz-msg-text"></p>
+      <div class="msg-btns"><button class="btn primary" type="button" id="wiz-msg-ok">확인</button></div>
+    </div>
+  </div>
+  <div class="wiz-nav"><button class="btn" type="button" id="wiz-prev">← 이전</button><button class="btn primary" type="button" id="wiz-next">다음 →</button></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const PRESETS=[
+ {n:"①",name:"한국 웹툰",ds:"깔끔한 선과 부드러운 명암. 가장 익숙한 웹툰 그림",sw:["#F3EBDD","#F6C7A8","#8FAAC8"],
+  ch:"modern Korean webtoon style character, clean crisp line art with soft cel shading, natural Korean facial features, glossy expressive eyes, clear palette of warm ivory, soft peach, and light denim blue",
+  bg:"modern Korean webtoon style background art, clean crisp line art with soft cel shading, clear palette of warm ivory, soft peach, and light denim blue",
+  end:"Korean webtoon cel-shaded style"},
+ {n:"②",name:"청춘 시네마틱 3D",ds:"애니메이션 영화 같은 입체감과 따뜻한 빛",sw:["#D9922E","#7C7A3A","#CDB89B"],
+  ch:"cinematic stylized 3D animated character, natural Korean facial features, realistic skin and hair texture, soft warm film lighting, muted color grading of amber, olive, and dusty beige",
+  bg:"cinematic stylized 3D animated environment, realistic surface textures, soft warm film lighting, muted color grading of amber, olive, and dusty beige",
+  end:"stylized 3D animated film style"},
+ {n:"③",name:"잔잔한 수채 일러스트",ds:"번지는 물감과 종이 결이 보이는 손그림",sw:["#A3B18A","#D8C7A4","#E0957F"],
+  ch:"soft watercolor illustration character, delicate ink linework over visible paper grain, natural Korean facial features, muted palette of sage green, sand beige, and faded coral, quiet literary mood",
+  bg:"soft watercolor illustration background, delicate ink linework over visible paper grain, muted palette of sage green, sand beige, and faded coral, quiet literary mood",
+  end:"soft watercolor and ink illustration style"},
+ {n:"④",name:"시린 감성 애니메이션",ds:"차갑고 맑은 빛이 감도는 섬세한 애니메이션 그림",sw:["#CFE6F2","#D7DADF","#1F2A4A"],
+  ch:"emotional anime-style illustrated character, delicate soft-focus rendering, natural Korean facial features, luminous cool rim light, palette of icy blue, pale silver, and deep navy",
+  bg:"emotional anime-style background art, delicate soft-focus rendering, luminous cool light with a gentle glow, palette of icy blue, pale silver, and deep navy",
+  end:"soft-focus emotional anime illustration style"},
+ {n:"⑤",name:"몽환적 근미래 SF",ds:"표면이 은은하게 빛나는 회색·청록빛 디지털 회화",sw:["#8E8C88","#1FD1C1","#CDBDE6"],
+  ch:"near-future sci-fi character, semi-realistic digital painting, natural Korean facial features, faint iridescent glow on skin, palette of dust grey, neon teal, and pale lilac",
+  bg:"near-future sci-fi environment, semi-realistic digital painting, faint iridescent glow on surfaces, palette of dust grey, neon teal, and pale lilac",
+  end:"semi-realistic sci-fi digital painting style"},
+ {n:"⑥",name:"팝 그래픽",ds:"쨍한 원색과 스티커처럼 반짝이는 광택",sw:["#FF3D8B","#FFE94A","#2F5BFF"],
+  ch:"trendy Korean pop illustration character in a K-pop photocard sticker style, smooth clean vector line art, bold flat color blocking on clothes and hair, simple two-tone cel shading on the face, natural Korean facial features, appealing face with bright sparkling eyes, natural warm skin tone, glossy sticker-like highlights, vivid palette of hot pink, lemon yellow, and electric blue",
+  bg:"trendy Korean pop illustration background in a K-pop photocard sticker style, smooth clean vector line art, bold flat color blocking, simple two-tone cel shading, glossy sticker-like highlights, vivid palette of hot pink, lemon yellow, and electric blue",
+  end:"bright K-pop photocard sticker illustration style"},
+ {n:"⑦",name:"파스텔 코지",ds:"둥근 연필 선과 포근한 파스텔색. 그림책 같은 그림",sw:["#FAF1DC","#F8E08E","#F2BDC1"],
+  ch:"cozy hand-drawn picture book cartoon character, soft rounded charcoal pencil line art with visible grainy strokes, flat pastel fills of cream, butter yellow, and blush pink, natural Korean facial features, subtle paper texture",
+  bg:"cozy hand-drawn picture book background, soft rounded charcoal pencil line art with visible grainy strokes, flat pastel fills of cream, butter yellow, and blush pink, subtle paper texture",
+  end:"soft charcoal-and-pastel picture book style"},
+ {n:"⑧",name:"흑백 만화",ds:"짙은 검정과 굵은 스크린톤. 대비가 강한 흑백 만화",sw:["#111111","#9A9A9A","#FFFFFF"],
+  ch:"black-and-white manga ink drawing of a character, black ink on white only with no color at all, bold crisp pen ink lines, heavy solid black shadows, bold clearly visible screentone dot shading, natural Korean facial features, intense dramatic expression, tense mood like a single dramatic manga panel, no panel borders, no speech bubbles, no sound effect text, plain white background",
+  bg:"black-and-white manga background ink drawing, black ink on white only with no color at all, bold crisp pen ink lines, heavy solid black shadows, bold clearly visible screentone dot shading, high-contrast dramatic lighting, tense mood like a single dramatic manga panel, no panel borders, no speech bubbles, no sound effect text",
+  end:"black-and-white manga ink with heavy blacks and bold screentone"},
+ {n:"⑨",name:"레트로 인쇄",ds:"단순한 모양과 옅은 망점. 1960년대 인쇄 그림 같은 느낌",sw:["#E2483A","#233A6B","#F4EAD5"],
+  ch:"charming 1960s mid-century vintage print illustration of a character, simple stylized shapes, clean confident line work, subtle halftone dot texture only in shaded areas, smooth clean face with gentle features, natural Korean facial features, natural warm skin tone, limited palette of tomato red, navy blue, and cream, crisp unfaded ink on clean paper",
+  bg:"charming 1960s mid-century vintage print illustration of a place, simple stylized shapes, clean confident line work, subtle halftone dot texture only in shaded areas, limited palette of tomato red, navy blue, and cream, crisp unfaded ink on clean paper",
+  end:"charming mid-century vintage print illustration style"}
+];
+const EXAMPLES=__EXAMPLES__;
+const EXAMPLES_BG=__EXAMPLES_BG__;
+const SHOTS=["클로즈업","가슴 위","웨이스트 숏","풀 숏"], DIRS=["정면","비스듬히","옆모습","뒷모습","뒤돌아봄"], HEIGHTS=["아이 레벨","하이 앵글","로 앵글"];
+const SHOT_INFO={
+ "클로즈업":{note:"얼굴과 어깨 위. 표정과 감정을 보여 주는 컷",rule:"  클로즈업: 얼굴과 어깨 윗부분만 화면에 담으세요. 표정이 잘 보이게 하세요."},
+ "가슴 위":{note:"가슴 위까지. 인물 소개 컷에 무난함",rule:"  가슴 위: 화면에는 가슴 위만 보이게 그리세요."},
+ "웨이스트 숏":{note:"허리 위까지. 손과 소품이 보여서 무언가를 들고 있는 컷에 좋음",rule:"  웨이스트 숏: 허리 위까지 화면에 담고, 손이 보이게 하세요."},
+ "풀 숏":{note:"머리부터 발끝까지 전신. 배경 위에 세울 인물에 좋음",rule:"  풀 숏: 머리부터 발끝까지 화면 안에 다 들어오게 하고, 발이나 머리가 잘리지 않게 하세요."}
+};
+const DIR_RULE={
+ "정면":"화면을 바라보는 정면으로 그리세요.",
+ "비스듬히":"몸을 비스듬히 돌린 모습으로 그리세요.",
+ "옆모습":"옆모습으로 그리세요.",
+ "뒷모습":"뒷모습으로 그리세요. 얼굴 묘사는 빼고 머리와 옷의 뒷모습을 묘사하세요.",
+ "뒤돌아봄":"등을 보인 채 어깨 너머로 고개를 돌려 돌아보는 모습으로 그리세요."
+};
+const HEIGHT_INFO={
+ "아이 레벨":{note:"눈높이. 가장 자연스럽고, 배경 위에 올리기 쉬움",rule:"눈높이(아이 레벨)에서 보는 각도로 그리세요. 카메라를 인물의 눈과 같은 높이에 두고 위아래로 기울이지 마세요. 영어 프롬프트에 eye-level shot, camera at the character's eye height, straight-on view, no upward or downward tilt 를 꼭 넣으세요."},
+ "하이 앵글":{note:"위에서 내려다봄. 인물이 작고 위축돼 보임",rule:"위에서 내려다보는 각도(하이 앵글)로 그리세요. 카메라를 인물의 머리보다 높이 두고 내려다보게 하세요. 영어 프롬프트에 high-angle shot, camera above the character looking down, top of the head visible, body foreshortened toward the bottom 을 꼭 넣으세요."},
+ "로 앵글":{note:"아래에서 올려다봄. 인물이 크고 당당해 보임",rule:"아래에서 올려다보는 각도(로 앵글)로 그리세요. 카메라를 인물의 허리보다 훨씬 낮은 바닥 가까이에 두고 위로 올려다보게 하세요. 화면 아래쪽 몸은 가깝고 크게, 머리는 멀고 작게 보이며, 턱 아래가 보여야 합니다. 눈높이에서 본 것처럼 반듯하게 그리지 마세요. 영어 프롬프트에 extreme low-angle shot, worm's-eye view, camera placed near the ground looking up at the character, strong upward perspective, lower body large and close to the camera, head smaller and farther away, underside of the chin visible 를 꼭 넣으세요."}
+};
+const ANGLES=["아이 레벨","하이 앵글","로 앵글"], SPOTS=["왼쪽","가운데","오른쪽","양쪽","없음"];
+
+const CH_EXAMPLE="[STYLE], full-body shot showing the entire figure from head to toe, three-quarter view, a boy about ten years old, small and slender build, soft round face with wide curious eyes, messy curly golden hair, wearing an ankle-length coat with a high collar, a long scarf wrapped around his neck with its ends fluttering to one side as if caught in a breeze, small boots, standing with feet together and head tilted slightly as if asking a question, a steady gaze that shows a stubborn and inquisitive nature, a single character shown only once, no character sheet, no multiple poses or views, vertical 2:3 portrait composition, centered with empty margin around the figure, clearly separated from the white backdrop, no cast shadow, no glow or particles around the figure, plain white backdrop, no background, no other objects, [STYLE END]";
+const BG_EXAMPLE="[STYLE], wide long shot at eye level, 16:9 widescreen landscape composition, the right third of the frame kept open and uncluttered with bare ground visible, a tiny rocky asteroid planet floating alone in an endless sky, its curved horizon visible across the frame, three small volcanoes rising from the dusty ground, a single rose growing under a glass dome, young baobab sprouts pushing up through the soil, sunset with low light casting long soft shadows, clear sky with the first faint stars appearing, quiet and lonely atmosphere, empty scene with no people and no characters, no text, [STYLE END]";
+
+/* 저장 (이 브라우저에만) */
+const store={get(k,d){try{const v=localStorage.getItem("bt."+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("bt."+k,JSON.stringify(v))}catch(e){}}};
+
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const val=s=>(s||"").trim();
+/* 받침에 따라 조사 고르기: josa("레트로 인쇄","으로","로") → "레트로 인쇄로" */
+const LATIN_TAIL={L:"ㄹ",M:"ㅁ",N:"ㄴ",R:"ㄹ"}, DIGIT_TAIL={"0":"ㅇ","1":"ㄹ","3":"ㅁ","6":"ㄱ","7":"ㄹ","8":"ㄹ"};
+function josa(word,withB,noB){
+  const ch=(word.trim().match(/[가-힣A-Za-z0-9](?=[^가-힣A-Za-z0-9]*$)/)||[""])[0];
+  let tail="";
+  if(/[가-힣]/.test(ch)){const t=(ch.charCodeAt(0)-0xAC00)%28;tail=t===0?"":(t===8?"ㄹ":"x")}
+  else if(/[A-Za-z]/.test(ch)) tail=LATIN_TAIL[ch.toUpperCase()]||"";
+  else if(/[0-9]/.test(ch)) tail=DIGIT_TAIL[ch]||"";
+  const isRo=withB==="으로";
+  const useB=isRo?(tail!==""&&tail!=="ㄹ"):tail!=="";
+  return word+(useB?withB:noB);
+}
+const orEmpty=s=>val(s)||"(비움)";
+
+const draft=store.get("draft",{});
+const state={
+  tab:"character",
+  presets:Object.assign({character:null,background:null},draft.presets||{}),
+  locks:Object.assign({character:null,background:null},store.get("locks",{})),
+  made:store.get("made",[]),
+  ch:Object.assign({kind:"사람",kinddesc:"",name:"",age:"",look:"",outfit:"",person:"",pose:"",key:"",shot:"가슴 위",dir:"정면",height:"아이 레벨"},draft.ch||{}),
+  places:(draft.places&&draft.places.length)?[draft.places[0]]:[blankPlace()]
+};
+/* 예전 저장값(그림체 하나)을 인물·배경 양쪽으로 옮기기 */
+(function(){const oldLock=store.get("locked",null);if(oldLock!=null&&state.locks.character==null&&state.locks.background==null){state.locks.character=oldLock;state.locks.background=oldLock;store.set("locks",state.locks)}
+ if(draft.preset!=null&&state.presets.character==null&&state.presets.background==null){state.presets.character=draft.preset;state.presets.background=draft.preset}})();
+Object.defineProperty(state,"preset",{get(){return this.presets[this.tab]},set(v){this.presets[this.tab]=v}});
+Object.defineProperty(state,"locked",{get(){return this.locks[this.tab]},set(v){this.locks[this.tab]=v}});
+["character","background"].forEach(t=>{if(state.presets[t]==null&&state.locks[t]!=null) state.presets[t]=state.locks[t]});
+function blankPlace(){return {place:"",see:"",time:"",mood:"",angle:"아이 레벨",spot:"없음"}}
+function saveDraft(){store.set("draft",{presets:state.presets,ch:state.ch,places:state.places})}
+
+/* 그림체 */
+function renderPresets(){
+  const box=$("#presets");box.innerHTML="";
+  PRESETS.forEach((p,i)=>{
+    const lab=document.createElement("label");
+    lab.className="preset"+(state.locked===i?" locked":"");
+    lab.innerHTML=`<input type="radio" name="preset" id="preset-${i}" value="${i}" ${state.preset===i?"checked":""}>
+      <span class="top"><span class="nm"><span class="num">${p.n}</span>${p.name}</span><span class="sw" aria-hidden="true">${p.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span></span>
+      <span class="ds">${p.ds}</span><span class="lock-badge">내 ${state.tab==="character"?"인물":"배경"} 그림체</span>`;
+    lab.querySelector("input").addEventListener("change",()=>{state.preset=i;saveDraft();update()});
+    box.appendChild(lab);
+  });
+}
+function renderPreview(){
+  const box=$("#preview");
+  if(state.preset==null){box.hidden=true;return}
+  const p=PRESETS[state.preset], src=EXAMPLES[state.preset];
+  box.hidden=false;
+  $("#pv-name").textContent=p.n+" "+p.name+" 예시";
+  $("#pv-ds").textContent=p.ds;
+  $("#pv-img").innerHTML=src?`<img src="${src}" alt="${p.name} 그림체로 그린 어린 왕자 예시">`:"<span>예시 그림 준비 중</span>";
+  const bsrc=EXAMPLES_BG[state.preset];
+  $("#pv-bg").innerHTML=bsrc?`<img src="${bsrc}" alt="${p.name} 그림체로 그린 어린 왕자의 작은 별 예시">`:"<span>예시 그림 준비 중</span>";
+}
+function presetLabel(i){return PRESETS[i].n+" "+PRESETS[i].name}
+function mismatch(){return state.locked!=null&&state.preset!=null&&state.preset!==state.locked}
+
+$("#btn-revert").addEventListener("click",()=>{state.preset=state.locked;saveDraft();renderPresets();update()});
+$("#btn-reset").addEventListener("click",()=>{$("#btn-reset-yes").click()});
+$("#btn-reset-no").addEventListener("click",()=>{$("#reset-confirm").hidden=true});
+$("#btn-reset-yes").addEventListener("click",()=>{const kind=state.tab==="character"?"인물":"배경";state.locked=null;state.made=state.made.filter(m=>m.t!==kind);store.set("locks",state.locks);store.set("made",state.made);$("#reset-confirm").hidden=true;renderPresets();update()});
+
+/* 세그먼트 */
+function seg(el,name,opts,cur,on){
+  el.innerHTML=opts.map((o,i)=>`<label><input type="radio" name="${name}" id="${name}-${i}" value="${o}" ${o===cur?"checked":""}><span>${o}</span></label>`).join("");
+  el.querySelectorAll("input").forEach(inp=>inp.addEventListener("change",()=>on(inp.value)));
+}
+
+/* 인물 입력 */
+const CH_FIELDS=["kinddesc","name","age","look","outfit","person","pose","key"];
+const KINDS=["사람","동물","그 밖의 존재"];
+const KIND_INFO={
+ "사람":{label:"사는 세계·환경",ph:"예: 현대 대한민국 / 소행성 B612",hint:"현실 속 인물이면 '현대 대한민국'처럼, 미래·다른 행성 같은 상상 속 세계의 인물이면 그 세계를 쓰기. 생김새 칸에 얼굴을 따로 쓰지 않으면 한국 사람 얼굴로 그립니다."},
+ "동물":{label:"어떤 존재인지 설명해 주세요",ph:"예: 귀가 쫑긋한 사막여우",hint:""},
+ "그 밖의 존재":{label:"어떤 존재인지 설명해 주세요",ph:"예: 유리 덮개 속에서 말하는 장미",hint:"로봇, 외계 생명체, 말하는 사물 등. 사람 얼굴로 그리지 않습니다."}
+};
+const KIND_PH={
+ "사람":{name:"어린 왕자",age:"열 살쯤 된 남자아이",look:"작고 마른 몸, 금빛 곱슬머리",outfit:"발목까지 오는 깃 높은 코트, 목에 두른 긴 목도리",person:"궁금한 것은 끝까지 묻는 고집 있는 성격",pose:"고개를 살짝 기울이고 무언가 묻는 듯한 얼굴",key:"바람에 날리는 목도리"},
+ "동물":{name:"여우",age:"다 자란 여우",look:"작은 몸, 커다란 세모 귀, 금빛이 도는 털, 복슬복슬한 꼬리",outfit:"옷 없음",person:"쉽게 곁을 내주지 않지만, 한번 친해지면 다정한 성격",pose:"풀밭에 앉아 고개를 갸웃하며 바라보는 모습",key:"발밑에 흔들리는 밀 이삭"},
+ "그 밖의 존재":{name:"장미",age:"막 피어난 꽃",look:"붉은 꽃잎, 가늘고 곧은 초록 줄기, 줄기에 난 가시 네 개",outfit:"옷 없음",person:"자존심이 세고 투정을 부리지만 속은 여린 성격",pose:"꽃잎을 살짝 오므리고 고개를 돌린 모습",key:"장미를 덮은 둥근 유리 덮개"}
+};
+function renderKind(){
+  if(state.ch.kind==="한국 사람"||state.ch.kind==="SF·가상 세계 속 인물") state.ch.kind="사람";
+  if(!KINDS.includes(state.ch.kind)) state.ch.kind="사람";
+  seg($("#seg-kind"),"kind",KINDS,state.ch.kind,v=>{state.ch.kind=v;saveDraft();renderKind();update()});
+  const info=KIND_INFO[state.ch.kind];
+  $("#kinddesc-label").innerHTML=info.label;
+  $("#ch-kinddesc").placeholder=info.ph; $("#kind-hint").textContent=info.hint; $("#kind-hint").hidden=!info.hint;
+  const ph=KIND_PH[state.ch.kind];Object.keys(ph).forEach(k=>{$("#ch-"+k).placeholder="예: "+ph[k]});
+}
+function bindCh(){
+  CH_FIELDS.forEach(k=>{const el=$("#ch-"+k);el.value=state.ch[k]||"";el.addEventListener("input",()=>{state.ch[k]=el.value;saveDraft();update()})});
+  renderScreenSegs();
+  renderKind();
+}
+function fillCh(o){Object.assign(state.ch,o);renderKind();CH_FIELDS.forEach(k=>$("#ch-"+k).value=state.ch[k]);renderScreenSegs();saveDraft();update()}
+
+/* 화면 고르기 예시 그림: 샷(어디까지 보이나) · 방향(얼굴이 어디를 보나) · 카메라 높이(원근) */
+function figureSvg(shot,dir,height){
+  const PV={"아이 레벨":{g:1,a:1,b:0,fy:0},"하이 앵글":{g:1.6,a:.7,b:.8,fy:3},"로 앵글":{g:.6,a:1.35,b:-.75,fy:-3}}[height]||{g:1,a:1,b:0,fy:0};
+  const W=t=>PV.a+PV.b*t, f=(x,y)=>{const t=Math.max(0,-y/100);return [x*W(t),-100*Math.pow(t,PV.g)]};
+  const bottomT={"클로즈업":.69,"가슴 위":.6,"웨이스트 숏":.4,"풀 숏":-.05}[shot]??.6;
+  const ytop=f(0,-101.5)[1], ybot=bottomT<0?6:f(0,-100*bottomT)[1], s=92/(ybot-ytop);
+  const X=x=>(50+x*s).toFixed(1), Y=y=>(4+(y-ytop)*s).toFixed(1);
+  const pl=(pts,c="ln")=>`<polyline class="${c}" points="${pts.map(([x,y])=>{const q=f(x,y);return X(q[0])+","+Y(q[1])}).join(" ")}"/>`;
+  const side=dir==="옆모습", tq=dir==="비스듬히", back=dir==="뒷모습"||dir==="뒤돌아봄";
+  const sh=side?6:tq?12:14, hp=side?5:tq?9:10, ar=side?0:tq?14:17;
+  let body=pl([[-sh,-74],[sh,-74],[hp,-46],[-hp,-46],[-sh,-74]],"ln face");
+  body+=pl([[0,-78],[0,-74]]);
+  if(side) body+=pl([[1,-73],[4,-45]]);
+  else body+=pl([[-sh,-73],[-ar,-44]])+pl([[sh,-73],[ar,-44]]);
+  body+=side?pl([[-2,-46],[-3,0]])+pl([[2,-46],[5,0]]):pl([[-hp*.55,-46],[-hp*.65,0]])+pl([[hp*.55,-46],[hp*.65,0]]);
+  const hc=f(0,-88), hr=10*W(.88)*s, cx=+X(hc[0]), cy=+Y(hc[1]);
+  const L=(x,y)=>[(cx+x*hr/10).toFixed(1),(cy+y*hr/10).toFixed(1)];
+  const F=(x,y)=>L(x,y+PV.fy);
+  const P=pts=>pts.map(p=>F(...p).join(",")).join(" ");
+  let head=`<circle class="ln face" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${hr.toFixed(1)}"/>`;
+  const dot=(x,y)=>{const [a,b]=F(x,y);return `<circle class="fill-ink" cx="${a}" cy="${b}" r="${Math.max(.8,hr*.11).toFixed(1)}"/>`};
+  const nose=`<polyline class="ln" points="${P([[9.6,-3],[12.6,1.5],[9.4,3]])}"/>`;
+  if(dir==="뒷모습"){
+    head=`<circle class="ln hair" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${hr.toFixed(1)}"/>`;
+  }else if(dir==="뒤돌아봄"){
+    head+=`<path class="ln hair" d="M${L(1,-10)} A${hr.toFixed(1)} ${hr.toFixed(1)} 0 0 0 ${L(1,10)} Q${L(-2,0)} ${L(1,-10)}Z"/>`+dot(5.5,-1)+nose;
+  }else{
+    const hb=-1+PV.fy*.8, hx=Math.sqrt(Math.max(0,100-hb*hb));
+    head+=`<path class="ln hair" d="M${L(-hx,hb)} A${hr.toFixed(1)} ${hr.toFixed(1)} 0 ${hb>0?1:0} 1 ${L(hx,hb)} Q${L(0,hb-6)} ${L(-hx,hb)}Z"/>`;
+    if(side) head+=dot(5.5,-1)+nose;
+    else if(tq) head+=dot(1,-1)+dot(6.5,-1.2)+`<polyline class="ln" points="${P([[8,0],[9.6,2.6],[7.6,3.2]])}"/><polyline class="ln" points="${P([[2,5],[6,4.6]])}"/>`;
+    else head+=dot(-3.6,-1)+dot(3.6,-1)+`<polyline class="ln" points="${P([[-3,4.5],[0,5.6],[3,4.5]])}"/>`;
+  }
+  let floor="";
+  if(height==="하이 앵글") floor=[-60,-20,20,60,100,140].map(x=>`<path class="ln thin" d="M${x} 104L${(50+(x-50)*.25).toFixed(1)} -20"/>`).join("");
+  else if(height==="로 앵글") floor=[-40,0,100,140].map(x=>`<path class="ln thin" d="M${x} -4L${(50+(x-50)*.3).toFixed(1)} 130"/>`).join("");
+  else floor=`<path class="ln thin" d="M0 ${(cy+(-1)*hr/10).toFixed(1)}H100"/>`;
+  if(shot==="풀 숏"&&height!=="하이 앵글") floor+=`<path class="ln thin" d="M0 ${Y(0)}H100"/>`;
+  return `<svg viewBox="0 0 100 100">${floor}${body}${head}</svg>`;
+}
+function camSideSvg(h){
+  const Q={"하이 앵글":{x:36,y:10,r:28,tx:108,ty:38},"아이 레벨":{x:34,y:20,r:0,tx:100,ty:20},"로 앵글":{x:36,y:62,r:-28,tx:108,ty:34}}[h]||{x:34,y:20,r:0,tx:100,ty:20};
+  const phone=`<g transform="translate(${Q.x} ${Q.y}) rotate(${Q.r})"><rect class="ln" x="-4" y="-9" width="8" height="18" rx="2"/><circle class="fill-acc" cx="4" cy="0" r="2"/></g>`;
+  return `<svg viewBox="0 0 160 80"><path class="ln thin" d="M4 74H156"/><circle class="ln" cx="112" cy="20" r="7"/><path class="ln" d="M112 27V52M112 52L107 74M112 52L117 74M112 32L106 48M112 32L118 48"/><path class="ln acc dash" d="M${Q.x+5} ${Q.y}L${Q.tx} ${Q.ty}"/>${phone}</svg>`;
+}
+function renderFigs(){
+  const m=$("#ch-mini"); if(!m) return;
+  m.innerHTML=figureSvg(state.ch.shot,state.ch.dir,state.ch.height);
+  $("#ch-side").innerHTML=camSideSvg(state.ch.height);
+}
+function renderScreenSegs(){
+  if(state.ch.shot==="전신") state.ch.shot="풀 숏";
+  if(!SHOTS.includes(state.ch.shot)) state.ch.shot="가슴 위";
+  if(!HEIGHTS.includes(state.ch.height)) state.ch.height="아이 레벨";
+  seg($("#seg-shot"),"shot",SHOTS,state.ch.shot,v=>{state.ch.shot=v;saveDraft();update()});
+  seg($("#seg-dir"),"dir",DIRS,state.ch.dir,v=>{state.ch.dir=v;saveDraft();update()});
+  seg($("#seg-height"),"height",HEIGHTS,state.ch.height,v=>{state.ch.height=v;saveDraft();update()});
+}
+$("#ch-clear").addEventListener("click",()=>{$("#ch-confirm").hidden=false;$("#ch-confirm-no").focus()});
+$("#ch-confirm-no").addEventListener("click",()=>{$("#ch-confirm").hidden=true;$("#ch-clear").focus()});
+$("#ch-confirm-yes").addEventListener("click",()=>{$("#ch-confirm").hidden=true;fillCh({kind:"사람",kinddesc:"",name:"",age:"",look:"",outfit:"",person:"",pose:"",key:""});toast("칸을 비웠습니다. 새로운 인물은 새로운 대화창에서 프롬프트를 입력하세요.")});
+
+/* 장소 카메라 각도 예시 그림: 집 한 채와 나무 한 그루를 각도별로 */
+const PLACE_ANGLE_NOTE={"아이 레벨":"눈높이에서 봄. 장소가 보이는 그대로 나오고, 인물을 올리기 쉬움","하이 앵글":"위에서 내려다봄. 장소의 배치가 한눈에 보이고, 작고 쓸쓸해 보임","로 앵글":"아래에서 올려다봄. 건물·나무가 위로 갈수록 좁아지며 높고 웅장해 보임"};
+function placeAngleSvg(a){
+  let g="";
+  if(a==="하이 앵글"){
+    g+=[-40,10,60,110,160,210].map(x=>`<path class="ln thin" d="M${x} 96L${(80+(x-80)*.35).toFixed(1)} -6"/>`).join("");
+    g+=`<path class="ln face" d="M60 26H96L102 52H54Z"/><path class="ln" d="M57 39H99"/>`;
+    g+=`<path class="ln face" d="M54 52H102L98 64H58Z"/><path class="ln" d="M75 64V58H81V64"/>`;
+    g+=`<circle class="ln face" cx="126" cy="50" r="13"/><path class="ln thin" d="M120 46Q126 41 132 46"/>`;
+  }else if(a==="로 앵글"){
+    /* 땅바닥 가까이에서 올려다봄: 세로선이 모두 화면 위쪽 한 점(소실점)으로 모이고, 가운데로 하늘이 보임 */
+    const B=84, V=-120, P=(x,y)=>(x+(80-x)*(B-y)/(B-V)).toFixed(1), Q=(x,y)=>P(x,y)+" "+y;
+    g+=`<path class="ln thin" d="M0 83Q80 78 160 83"/><path class="ln thin" d="M10 89l7-2M34 88l6-2M60 90l7-2M100 89l7-2M126 87l6-2M150 89l6-2"/>`;
+    g+=`<path class="ln thin" d="M70 14q2-5 7-3q3-5 8-1q5 0 4 4H70Z"/>`;
+    [[100,3],[124,5],[154,8]].forEach(([x,w])=>{g+=`<path class="ln face" d="M${x-w} ${B}L${Q(x-w,10)}L${Q(x+w,10)}L${x+w} ${B}Z"/>`});
+    g+=`<path class="ln face" d="M80 -2Q84 8 90 12q4 8 11 4q5 9 13 3q6 9 14 2q6 8 14 1q5 6 10 0q4 6 12 2V-2Z"/>`;
+    const L=-8,R=60,T=22;
+    g+=`<path class="ln face" d="M${L} ${B}L${Q(L,T)}L${Q(R,T)}L${R} ${B}Z"/>`;
+    g+=`<path class="ln face" d="M${(+P(L,T)-4).toFixed(1)} ${T}L${(+P(R,T)+4).toFixed(1)} ${T}L${P((L+R)/2,2)} 2Z"/>`;
+    [[4,16],[34,46]].forEach(([a,b])=>{[[30,40],[50,60]].forEach(([t,u])=>{g+=`<path class="ln thin" d="M${Q(a,u)}L${Q(b,u)}L${Q(b,t)}L${Q(a,t)}Z"/>`})});
+    g+=`<path class="ln" d="M20 ${B}L${Q(20,68)}L${Q(32,68)}L32 ${B}"/>`;
+  }else{
+    g+=`<path class="ln thin" d="M0 70H160"/>`;
+    g+=`<path class="ln face" d="M52 70V44H96V70Z"/><path class="ln" d="M48 44L74 26L100 44Z"/><path class="ln" d="M70 70V58H78V70"/>`;
+    g+=`<path class="ln" d="M122 70V54"/><circle class="ln face" cx="122" cy="44" r="11"/>`;
+  }
+  return `<svg viewBox="0 0 160 90">${g}</svg>`;
+}
+function placeSideSvg(h){
+  const Q={"하이 앵글":{x:36,y:12,r:28,tx:104,ty:50},"아이 레벨":{x:34,y:52,r:0,tx:100,ty:52},"로 앵글":{x:30,y:66,r:-40,tx:116,ty:28}}[h]||{x:34,y:52,r:0,tx:100,ty:52};
+  const phone=`<g transform="translate(${Q.x} ${Q.y}) rotate(${Q.r})"><rect class="ln" x="-4" y="-9" width="8" height="18" rx="2"/><circle class="fill-acc" cx="4" cy="0" r="2"/></g>`;
+  return `<svg viewBox="0 0 160 80"><path class="ln thin" d="M4 74H156"/><path class="ln" d="M104 74V44H144V74"/><path class="ln" d="M100 44L124 26L148 44"/><path class="ln acc dash" d="M${Q.x+5} ${Q.y}L${Q.tx} ${Q.ty}"/>${phone}</svg>`;
+}
+/* 장소 입력 */
+function renderPlaces(){
+  const box=$("#places");box.innerHTML="";$("#bg-frame").innerHTML="";
+  state.places.forEach((p,idx)=>{
+    const d=document.createElement("div");d.className="place";
+    const id=k=>`pl-${idx}-${k}`;
+    d.innerHTML=`<div class="place-head"><h3>장소</h3></div>
+      <div class="fields">
+        <div class="f wide" id="${id("wrap")}"><label for="${id("place")}">장소 이름 <small>필수</small></label><input id="${id("place")}" autocomplete="off" placeholder="예: 어린 왕자가 사는 작은 별"></div>
+        <div class="f wide"><label for="${id("see")}">해당 장소에 보이는 것 <small>3~5개</small></label><textarea id="${id("see")}" placeholder="예: 작은 화산 세 개, 유리 덮개 속 장미 한 송이, 땅을 뚫고 나온 바오바브나무 싹"></textarea><span class="hint"><b>책에 장소 묘사가 없으면 책 내용에 어울리게 상상해서 써도 됩니다.</b></span></div>
+        <div class="f"><label for="${id("time")}">시간과 날씨</label><input id="${id("time")}" autocomplete="off" placeholder="예: 해 질 무렵, 맑은 하늘"></div>
+        <div class="f"><label for="${id("mood")}">분위기</label><input id="${id("mood")}" autocomplete="off" placeholder="예: 조용하고 외로움"></div>
+      </div>
+`;
+    box.appendChild(d);
+    const f2=document.createElement("div");f2.className="col";
+    f2.innerHTML=`<div class="frame-row">
+        <fieldset><legend class="legend">카메라 각도</legend><div class="seg" data-seg="angle"></div><span class="hint" data-angle-note></span></fieldset>
+        <div class="frame-figs" aria-hidden="true"><div><div class="fig-wide" data-angle-fig></div><div class="mini-cap">완성 그림 예시</div></div><div><div class="fig-side" data-angle-side></div><div class="mini-cap">옆에서 본 카메라</div></div></div>
+      </div>
+      <div class="frame-row">
+        <fieldset><legend class="legend">인물이 위치할 자리 정하기</legend><div class="seg" data-seg="spot"></div><span class="hint">인물이 들어갈 위치를 고릅니다. 내가 고른 위치는 사물 없이 비워 두고 이미지를 만듭니다.</span></fieldset>
+        <div aria-hidden="true" class="spot-wrap"><div class="fig-wide spot-fig" data-spot-fig></div><div class="mini-cap" data-spot-cap></div></div>
+      </div>
+      <p class="note" data-note hidden></p>`;
+    $("#bg-frame").appendChild(f2);
+    ["place","see","time","mood"].forEach(k=>{const el=d.querySelector("#"+id(k));el.value=p[k]||"";el.addEventListener("input",()=>{p[k]=el.value;saveDraft();update()})});
+    seg(f2.querySelector('[data-seg="angle"]'),id("angle"),ANGLES,p.angle,v=>{p.angle=v;saveDraft();placeExtras(f2,p);update()});
+    seg(f2.querySelector('[data-seg="spot"]'),id("spot"),SPOTS,p.spot,v=>{p.spot=v;saveDraft();placeExtras(f2,p);update()});
+    placeExtras(f2,p);
+  });
+}
+function spotSvg(spot){
+  /* 16:9 화면을 세 칸으로 나눔. 고른 칸은 강조색 배경 + 인물 실루엣, 그 칸의 사물은 지움. 나머지 칸은 배경 사물만 */
+  const on={왼쪽:[0],가운데:[1],오른쪽:[2],양쪽:[0,2],없음:[]}[spot]||[];
+  const W=160/3, obj=[
+    `<path class="ln" d="M26 70V56"/><circle class="ln face" cx="26" cy="46" r="11"/>`,
+    `<path class="ln face" d="M66 70V52H94V70Z"/><path class="ln" d="M62 52L80 40L98 52Z"/><path class="ln" d="M77 70V62H83V70"/>`,
+    `<path class="ln" d="M134 70V62"/><path class="ln face" d="M134 30L146 50H140L150 62H118L128 50H122Z"/>`];
+  let g=`<path class="ln thin" d="M0 70H160"/>`;
+  for(let i=0;i<3;i++){
+    const x=i*W, cx=x+W/2;
+    if(on.includes(i)){
+      g+=`<rect x="${(x+3).toFixed(1)}" y="4" width="${(W-6).toFixed(1)}" height="82" rx="4" style="fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3;vector-effect:non-scaling-stroke"/>`;
+      g+=`<path class="ln thin" d="M${(x+3).toFixed(1)} 70H${(x+W-3).toFixed(1)}"/>`;
+      g+=`<circle cx="${cx.toFixed(1)}" cy="31" r="8" style="fill:var(--accent)"/><path d="M${(cx-13).toFixed(1)} 70V55Q${(cx-13).toFixed(1)} 42 ${cx.toFixed(1)} 42Q${(cx+13).toFixed(1)} 42 ${(cx+13).toFixed(1)} 55V70Z" style="fill:var(--accent)"/>`;
+    }else g+=obj[i];
+  }
+  [W,2*W].forEach(x=>{g+=`<path class="ln thin dash" d="M${x.toFixed(1)} 0V90" style="opacity:.45"/>`});
+  return `<svg viewBox="0 0 160 90">${g}</svg>`;
+}
+function placeExtras(d,p){
+  const fig=d.querySelector("[data-angle-fig]"); if(fig) fig.innerHTML=placeAngleSvg(p.angle);
+  const sd=d.querySelector("[data-angle-side]"); if(sd) sd.innerHTML=placeSideSvg(p.angle);
+  const an=d.querySelector("[data-angle-note]"); if(an) an.textContent=PLACE_ANGLE_NOTE[p.angle]||"";
+  const sf=d.querySelector("[data-spot-fig]"); if(sf) sf.innerHTML=spotSvg(p.spot);
+  const sc=d.querySelector("[data-spot-cap]"); if(sc) sc.innerHTML=p.spot==="없음"?"완성 그림 예시 · 인물 없이 배경만":"완성 그림 예시 · <b style=\"color:var(--accent)\">색칠된 칸</b>에 인물이 들어감";
+  const note=d.querySelector("[data-note]");
+  if(p.spot!=="없음"&&p.angle!=="아이 레벨"){note.hidden=false;note.textContent="배경에 인물이 위치한다면 아이 레벨이 가장 자연스럽습니다. "+josa(p.angle,"을","를")+" 쓰려면 인물 없이 배경만 쓰는 컷으로 생각해 보세요."}
+  else if(p.spot==="없음"){note.hidden=false;note.textContent="인물 자리 없음: 인물 없이 배경만 쓰는 컷(장소 소개 등)으로 만듭니다."}
+  else note.hidden=true;
+}
+$("#bg-clear").addEventListener("click",()=>{$("#bg-confirm").hidden=false;$("#bg-confirm-no").focus()});
+$("#bg-confirm-no").addEventListener("click",()=>{$("#bg-confirm").hidden=true;$("#bg-clear").focus()});
+$("#bg-confirm-yes").addEventListener("click",()=>{$("#bg-confirm").hidden=true;state.places=[blankPlace()];saveDraft();renderPlaces();update();toast("칸을 비웠습니다. 새로운 장소는 새로운 대화창에서 프롬프트를 입력하세요.")});
+
+/* 프롬프트 */
+function chStyle(p,kind){
+  if(!p) return "(그림체를 고르세요)";
+  return ["동물","그 밖의 존재"].includes(kind)?p.ch.replace(", natural Korean facial features",""):p.ch;
+}
+const KIND_RULE={
+ "사람":"",
+ "동물":"- 동물은 내가 쓴 생김새대로 그리세요. 내가 쓰지 않았다면 옷을 입히거나 두 발로 세우지 마세요.\n",
+ "그 밖의 존재":"- 사람이 아닌 존재는 내가 쓴 생김새대로 그리고, 사람 얼굴로 바꾸지 마세요.\n"
+};
+function kindLine(c){
+  if(c.kind==="사람") return "인물 종류: 사람 (사는 세계·환경: "+orEmpty(c.kinddesc)+")";
+  return "인물 종류: "+c.kind+" ("+orEmpty(c.kinddesc)+")";
+}
+function kindRule(c){
+  if(c.kind==="사람") return "- 사는 세계·환경은 내가 쓴 만큼만 옷과 소품으로 나타내세요.\n- 생김새 칸에 얼굴·피부·머리색을 따로 묘사하지 않았다면 한국 사람 얼굴로 그리세요. 따로 묘사했다면 내 묘사를 따르세요.\n";
+  return KIND_RULE[c.kind]||"";
+}
+function buildCh(){
+  const c=state.ch, p=PRESETS[state.preset];
+  return `먼저 확인할 것:
+이 대화에서 아래와 같은 긴 요청문(인물용이든 장소용이든 '반드시 지킬 규칙'과 '진행 순서'가 들어 있는 글)을 이미 한 번 받았다면, 이번 요청문은 따르지 말고 Prompt도 이미지도 만들지 말고 아래 문장만 그대로 답하세요. 이 대화에서 처음 받은 요청문이면 이 확인은 건너뛰고 아래 요청대로 하세요.
+"이 대화창에는 이미 프롬프트를 붙여 넣었습니다. 지금 인물을 고치거나 더 만들려면 바꿀 부분만 짧게 써 주세요. 새 인물은 새 대화창을 열어 프롬프트를 붙여 넣어 주세요."
+
+인물 한 명의 이미지를 만들어 주세요.
+인물은 내가 책을 읽고 직접 쓴 아래 묘사로만 만들어 주세요.
+
+내가 원하는 비주얼 스타일:
+
+스타일 문장 (프롬프트 맨 앞):
+${chStyle(p,c.kind)}
+
+마무리 문장 (프롬프트 맨 끝):
+${p?"drawn entirely in "+p.end:"(그림체를 고르세요)"}
+
+내가 직접 쓴 인물 묘사:
+${kindLine(c)}
+인물 이름: ${orEmpty(c.name)}
+나이, 성별: ${orEmpty(c.age)}
+생김새 (얼굴·머리·체형): ${orEmpty(c.look)}
+옷차림: ${orEmpty(c.outfit)}
+성격: ${orEmpty(c.person)}
+표정과 자세: ${orEmpty(c.pose)}
+꼭 보여야 할 소품: ${orEmpty(c.key)}
+
+내가 고른 화면:
+샷: ${c.shot}
+방향: ${c.dir}
+카메라 높이: ${c.height}
+
+반드시 지킬 규칙:
+- 스타일 문장은 프롬프트 맨 앞에, 마무리 문장은 맨 끝에 한 글자도 바꾸지 말고 그대로 넣으세요.
+- 선, 채색, 질감은 스타일 문장대로 그리세요. 다른 그림체로 바꾸거나 매끈한 디지털 그림으로 다듬지 마세요.
+${kindRule(c)}- 책 내용을 찾아보거나, 내 묘사에 없는 설정을 책에서 가져와 보태지 마세요.
+- 내가 쓴 묘사는 하나도 빠뜨리지 말고 영어로 옮기세요. 뜻을 바꾸거나 더 극적으로 꾸미지 마세요.
+- 빈 칸이나 부족한 부분은 그림에 꼭 필요한 만큼만 채우세요.
+- 성격은 성격 단어만 쓰지 말고 표정과 자세로 보이게 쓰세요.
+- 내가 고른 샷을 쓰세요.
+${(SHOT_INFO[c.shot]||SHOT_INFO["가슴 위"]).rule}${c.shot!=="풀 숏"?"\n  내 옷차림 중 화면 밖에 있는 부분(신발·바지 등)은 프롬프트에서 빼세요.":""}
+- 방향: ${DIR_RULE[c.dir]||DIR_RULE["정면"]}
+- 카메라 높이: ${(HEIGHT_INFO[c.height]||HEIGHT_INFO["아이 레벨"]).rule}
+- 옷과 머리 색은 스타일 문장의 팔레트 안에서 쓰세요. 인물을 알아보는 데 꼭 필요한 색만 내가 쓴 대로 두세요.
+- 흰색 옷이나 흰 머리는 off-white로 써서 흰 배경과 구별되게 하세요.
+- 실제 사람(연예인, 유명인, 친구 등)의 이름이나 닮은 모습은 넣지 마세요. 묘사에 있으면 빼세요.
+- 편집 앱에서 배경을 지울 수 있도록, 인물을 화면 가운데에 두고 둘레에 여백을 남기세요.
+- 인물이 흰 배경과 확실히 구분되게 하되, 선과 질감은 그림체대로 두세요. 인물 둘레에 빛 번짐·반짝이·연기·날리는 머리카락을 넣지 마세요.
+- 바닥 그림자를 넣지 마세요.
+- 배경은 순수한 흰 배경(plain white backdrop)만 사용하세요.
+- 배경 장소, 방, 풍경, 스토리 장면, 배경 디테일은 절대 넣지 마세요.
+- '꼭 보여야 할 소품' 말고는 소품을 넣지 마세요.
+- 화면에는 이 인물 한 명을 딱 한 번만 그리세요. 같은 인물을 여러 번 그리거나, 여러 자세·표정·각도를 나란히 놓은 캐릭터 시트(설정화)로 만들지 마세요. 다른 사람이나 동물도 넣지 마세요.
+- 영어 프롬프트에 a single character shown only once, no character sheet, no multiple poses or views 를 꼭 넣으세요.
+- 이미지는 세로로 긴 2:3 비율로 만드세요.
+
+프롬프트가 묘사할 요소 (이 순서대로):
+비주얼 스타일 / 샷 / 방향 / 카메라 높이 / 인물 수(한 명, 한 번만) / 나이와 성별 / 체형 / 얼굴 / 머리 / 의상 / 핵심 디테일 / 표정과 자세 / 성격 / 배경과 테두리 / 마무리 문장
+
+이미지 생성용 영어 프롬프트는 아래 예시와 같은 구조·같은 밀도로 작성하세요. [STYLE] 자리에는 스타일 문장이, [STYLE END] 자리에는 마무리 문장이 들어갑니다:
+
+${CH_EXAMPLE}
+
+진행 순서:
+1. 위 묘사와 규칙으로 이미지 생성용 영어 프롬프트를 만들고, 되묻거나 확인을 기다리지 말고 바로 이미지를 한 장 만드세요. 만든 영어 프롬프트, 인물 이름, 설명, 요약은 답변에 쓰지 마세요.
+2. 이미지를 만든 뒤에 내가 고칠 점이나 바꿀 표정·동작·구도를 말하면, 말한 부분만 바꾸고 나머지(얼굴, 머리, 체형, 옷, 그림체, 흰 배경, 한 명만)는 그대로 둔 채 바로 이미지를 한 장 만드세요.
+3. 이미지를 만들 때마다 답변에는 이미지와 아래 문장만 쓰세요. 이 문장 말고는 프롬프트, 설명, 주의 사항, 제안, 질문 등 어떤 글도 쓰지 마세요.
+"고칠 점이 있으면 바꿀 부분만 짧게 써 주세요. 마음에 든다면 해당 인물로 추가 제작할 이미지의 표정·동작·구도만 써 주세요. 프롬프트를 처음부터 다시 붙여 넣지 마세요."
+4. 이 대화에서 이미지를 만들 수 없을 때만, 'Prompt:' 다음에 이미지 생성용 영어 프롬프트를 쓰고 한국어로 이미지를 만들 수 없다고만 알려 주세요.`;
+}
+function buildBg(){
+  const p=PRESETS[state.preset];
+  const places=state.places.map((pl,i)=>`장소 이름: ${orEmpty(pl.place)}
+해당 장소에 보이는 것 (3~5개): ${orEmpty(pl.see)}
+시간과 날씨: ${orEmpty(pl.time)}
+분위기: ${orEmpty(pl.mood)}
+카메라 각도: ${pl.angle}
+인물 자리: ${pl.spot}`).join("\n\n");
+  return `먼저 확인할 것:
+이 대화에서 아래와 같은 긴 요청문(인물용이든 장소용이든 '반드시 지킬 규칙'과 '진행 순서'가 들어 있는 글)을 이미 한 번 받았다면, 이번 요청문은 따르지 말고 Prompt도 이미지도 만들지 말고 아래 문장만 그대로 답하세요. 이 대화에서 처음 받은 요청문이면 이 확인은 건너뛰고 아래 요청대로 하세요.
+"이 대화창에는 이미 프롬프트를 붙여 넣었습니다. 지금 장소를 고치거나 더 만들려면 바꿀 부분만 짧게 써 주세요. 새 장소는 새 대화창을 열어 프롬프트를 붙여 넣어 주세요."
+
+장소 한 곳의 배경 그림 이미지를 만들어 주세요.
+
+내가 원하는 비주얼 스타일:
+
+스타일 문장 (프롬프트 맨 앞):
+${p?p.bg:"(그림체를 고르세요)"}
+
+마무리 문장 (프롬프트 맨 끝):
+${p?"drawn entirely in "+p.end:"(그림체를 고르세요)"}
+
+내가 직접 쓴 장소 묘사:
+
+${places}
+
+반드시 지킬 규칙:
+- 스타일 문장은 프롬프트 맨 앞에, 마무리 문장은 맨 끝에 한 글자도 바꾸지 말고 그대로 넣으세요.
+- 선, 채색, 질감은 스타일 문장대로 그리세요. 다른 그림체로 바꾸거나 매끈한 디지털 그림으로 다듬지 마세요.
+- 내가 쓴 묘사는 하나도 빠뜨리지 말고 영어로 옮기세요. 뜻을 바꾸거나 더 극적으로 꾸미지 마세요.
+- 장소에 당연히 있는 기본 구조(예: 교실의 책상, 바닷가의 모래)만 채울 수 있습니다. 내가 쓰지 않은 사물·건물·상징은 새로 넣지 마세요.
+- 나라를 적지 않은 현실의 장소는 오늘날 한국의 장소로 그리세요.
+- 사람을 넣지 마세요. 뒷모습·그림자·실루엣, 이야기 속 인물 역할을 하는 동물·로봇도 넣지 마세요. 내 묘사에 사람이 있으면 사람이 있던 흔적(빈 의자, 놓인 가방 등)으로 바꾸세요.
+- 글자, 간판, 표지판, 화면 속 글씨를 넣지 마세요.
+- 장소 전체가 보이는 롱 숏으로, 내가 고른 카메라 각도를 쓰세요.
+- 인물 자리를 골랐다면 그 부분(왼쪽·오른쪽은 화면의 3분의 1 정도)을 사물 없이 비워 두고, 땅이나 바닥이 보이게 하세요. 그 자리에 사람을 그리지 마세요.
+- 시간과 날씨는 빛의 밝기와 방향으로 나타내세요. 색은 스타일 문장의 팔레트 안에서만 쓰세요.
+- 가로 화면 16:9 비율로 만드세요.
+- 한 장면만 그리세요. 화면을 여러 칸으로 나누거나 같은 장소를 여러 장 이어 붙이지 마세요.
+
+프롬프트가 묘사할 요소 (이 순서대로):
+비주얼 스타일 / 카메라 각도 / 화면 비율 / 비워 둘 자리 / 장소 / 공간의 크기와 구조 / 주요 사물 / 시간과 날씨 / 빛 / 분위기 / 넣지 않을 것 / 마무리 문장
+
+이미지 생성용 영어 프롬프트는 아래 예시와 같은 구조·같은 밀도로 작성하세요. [STYLE] 자리에는 스타일 문장이, [STYLE END] 자리에는 마무리 문장이 들어갑니다:
+
+${BG_EXAMPLE}
+
+진행 순서:
+1. 위 묘사와 규칙으로 이미지 생성용 영어 프롬프트를 만들고, 되묻거나 확인을 기다리지 말고 바로 가로 16:9 이미지를 한 장 만드세요. 만든 영어 프롬프트, 장소 이름, 설명, 요약은 답변에 쓰지 마세요.
+2. 이미지를 만든 뒤에 내가 고칠 점이나 바꿀 카메라 각도·시간과 날씨·인물 자리를 말하면, 말한 부분만 바꾸고 나머지(장소의 구조, 사물, 그림체, 한 장면)는 그대로 둔 채 바로 가로 16:9 이미지를 한 장 만드세요.
+3. 이미지를 만들 때마다 답변에는 이미지와 아래 문장만 쓰세요. 이 문장 말고는 프롬프트, 설명, 주의 사항, 제안, 질문 등 어떤 글도 쓰지 마세요.
+"고칠 점이 있으면 바꿀 부분만 짧게 써 주세요. 마음에 든다면 해당 배경으로 추가 제작할 이미지의 카메라 각도·시간과 날씨·인물 자리만 써 주세요. 프롬프트를 처음부터 다시 붙여 넣지 마세요."
+4. 이 대화에서 이미지를 만들 수 없을 때만, 'Prompt:' 다음에 이미지 생성용 영어 프롬프트를 쓰고 한국어로 이미지를 만들 수 없다고만 알려 주세요.`;
+}
+
+const NEXT={
+ character:["새 대화를 열어 붙여 넣고 보내기. 한 인물은 끝까지 한 대화에서 만들기 (이미지를 만들 수 있는 대화형 AI)","다음 인물은 칸을 비우고 새로 써서 새 대화에서 따로 요청하기","대화는 지우지 않기. 이미지를 다 만들면 그 대화의 공유 링크를 만들어 모아 두기 (영상과 함께 제출). 엔딩 크레딧에 활용한 AI 도구와 AI로 생성한 이미지 목록 적기"],
+ background:["새 대화를 열어 붙여 넣고 보내기. 한 장소에서 생성할 이미지는 한 대화창 안에서 만들기 (이미지를 만들 수 있는 대화형 AI)","다음 장소는 칸을 비우고 새로 써서 새 대화에서 따로 요청하기","대화는 지우지 않기. 이미지를 다 만들면 그 대화의 공유 링크를 만들어 모아 두기 (영상과 함께 제출). 엔딩 크레딧에 활용한 AI 도구와 AI로 생성한 이미지 목록 적기"]
+};
+const CH_LABELS={kinddesc:"사는 세계·환경",name:"인물 이름",age:"나이·성별",look:"생김새",outfit:"옷차림",person:"성격",pose:"표정과 자세",key:"꼭 보여야 할 소품"};
+
+const PL_LABELS={place:"장소 이름",see:"해당 장소에 보이는 것",time:"시간과 날씨",mood:"분위기"};
+function missingFields(){
+  if(state.tab==="character") return CH_FIELDS.filter(k=>!val(state.ch[k])).map(k=>k==="kinddesc"&&state.ch.kind!=="사람"?"어떤 존재인지":CH_LABELS[k]);
+  return [...new Set(state.places.flatMap(p=>Object.keys(PL_LABELS).filter(k=>!val(p[k])).map(k=>PL_LABELS[k])))];
+}
+var showMissing=false;
+function check(){
+  if(state.preset==null) return {ok:false,msg:"<strong>그림체를 고르세요.</strong> 1단계에서 하나를 고르면 프롬프트가 완성됩니다."};
+  if(state.tab==="character"){
+    if(!val(state.ch.name)) return {ok:false,msg:"<strong>인물 이름을 쓰세요.</strong> 인물 이름 칸은 꼭 필요합니다."};
+    const empty=missingFields();
+    return empty.length?{ok:false,msg:`<strong>모든 칸을 채우세요.</strong> 비어 있는 칸: ${empty.join(", ")}`}:{ok:true,msg:"모든 칸을 채웠습니다."};
+  }
+  const miss=state.places.map((p,i)=>val(p.place)?null:i+1).filter(Boolean);
+  if(miss.length) return {ok:false,msg:`<strong>장소 이름을 쓰세요.</strong> 장소 이름 칸은 꼭 필요합니다.`};
+  const empty=missingFields();
+  return empty.length?{ok:false,msg:`<strong>모든 칸을 채우세요.</strong> 비어 있는 칸: ${empty.join(", ")}`}:{ok:true,msg:"모든 칸을 채웠습니다."};
+}
+
+var lastCopied=null;
+var mmPrev=null;
+function update(){
+  const mm=mismatch();
+  document.querySelectorAll(".lock-kind").forEach(el=>el.textContent=state.tab==="character"?"인물":"배경");
+  document.querySelectorAll(".lock-badge").forEach(el=>el.textContent="내 "+(state.tab==="character"?"인물":"배경")+" 그림체");
+  {const pm=$("#preset-modal"); if(!mm) pm.hidden=true; else if(mmPrev===false) pm.hidden=false; mmPrev=mm;}
+  if(mm){$("#locked-name").textContent=josa(presetLabel(state.locked),"으로","로");$("#btn-revert").textContent=josa(presetLabel(state.locked),"으로","로")+" 돌아가기"}
+  else $("#reset-confirm").hidden=true;
+  document.querySelectorAll(".preset").forEach((el,i)=>el.classList.toggle("locked",state.locked===i));
+
+  renderPreview();
+  const isCh=state.tab==="character";
+  const text=isCh?buildCh():buildBg();
+  $("#slip").innerHTML=esc(text).replace(/\(비움\)/g,'<mark>(비움)</mark>');
+  $("#out-kind").textContent=(isCh?"인물":"배경")+" · 대화형 AI에 붙여넣기";
+  const c=check();
+  const st=$("#status");st.className="status "+(c.ok?"empty":"bad");st.innerHTML=c.msg;
+  $("#out-warn").hidden=!mm;
+  $("#copy").disabled=!c.ok||mm;
+  $("#copy").classList.toggle("ready",c.ok&&!mm&&c.msg==="모든 칸을 채웠습니다."&&text!==lastCopied);
+  document.querySelectorAll('[data-screen="4"] .f').forEach(f=>{const el=f.querySelector('input:not([type=checkbox]):not([type=radio]),textarea'); if(el) f.classList.toggle("missing",showMissing&&!el.value.trim()&&!!f.closest("#panel-"+state.tab));});
+  if(showMissing&&screen===4&&!missingFields().length) $("#wiz-msg").hidden=true;
+  $("#next").innerHTML=NEXT[state.tab].map(s=>`<li>${esc(s)}</li>`).join("");
+
+  // 샷·방향 안내
+  const dn={정면:"정면: 화면을 바라보는 인물. 배경 어느 자리에 올려도 무난합니다.",
+    비스듬히:"비스듬히·옆모습: 배경에 올릴 때 인물이 화면 안쪽을 보게 놓기 (오른쪽 자리면 왼쪽을 보게). 방향이 반대면 편집 앱에서 좌우 반전하기.",
+    옆모습:"비스듬히·옆모습: 배경에 올릴 때 인물이 화면 안쪽을 보게 놓기 (오른쪽 자리면 왼쪽을 보게). 방향이 반대면 편집 앱에서 좌우 반전하기.",
+    뒷모습:"뒷모습: 얼굴 묘사는 빠지고 머리와 옷의 뒷모습만 그립니다.",
+    뒤돌아봄:"뒤돌아봄: 등을 보이고 어깨 너머로 돌아보는 모습. 궁금증을 남기는 장면에 잘 어울립니다. 배경에 올릴 때 얼굴이 화면 안쪽을 향하게 놓기."}[state.ch.dir];
+  $("#shot-note").textContent=(SHOT_INFO[state.ch.shot]||{}).note||"";
+  $("#height-note").textContent=((HEIGHT_INFO[state.ch.height]||{}).note||"")+". 배경 위에 올릴 인물은 배경과 같은 높이로 맞추기";
+  $("#dir-note").textContent=dn;
+  renderFigs();
+
+  // 만든 것
+  const made=$("#made");
+  if(!state.made.length){made.innerHTML='<span class="fs13 muted">아직 없습니다.</span>'}
+  else made.innerHTML=state.made.map(m=>`<span class="chip${m.t==="배경"?" bg":""}">${esc(m.t)} · ${esc(m.name)}</span>`).join("");
+  $("#made-preset").textContent=[["인물",state.locks.character],["배경",state.locks.background]].filter(x=>x[1]!=null).map(x=>x[0]+" "+presetLabel(x[1])).join(" · ");
+  $("#lineup").hidden=state.made.filter(m=>m.t==="인물").length<2;
+}
+
+/* 복사 */
+let toastTimer;
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.hidden=true,6000)}
+$("#copy").addEventListener("click",()=>{
+  const text=state.tab==="character"?buildCh():buildBg();
+  const done=()=>{
+    if(state.locked==null){state.locked=state.preset;store.set("locks",state.locks)}
+    if(state.tab==="character") state.made.push({t:"인물",name:val(state.ch.name)});
+    else state.places.forEach(p=>state.made.push({t:"배경",name:val(p.place)}));
+    lastCopied=text;store.set("made",state.made);update();
+    toast(state.tab==="character"?"복사했습니다. 새 대화를 열어 붙여 넣으세요. 한 인물은 끝까지 한 대화에서 만듭니다.":"복사했습니다. 새 대화를 열어 붙여 넣으세요. 한 장소에서 생성할 이미지는 한 대화창 안에서 만듭니다.");
+  };
+  const fallback=()=>{
+    const ta=document.createElement("textarea");ta.value=text;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0;pointer-events:none";
+    document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,text.length);
+    let ok=false;copyAllowed=true;try{ok=document.execCommand("copy")}catch(e){}copyAllowed=false;ta.remove();
+    if(ok)done();else toast("복사하지 못했습니다. '프롬프트 복사' 버튼을 다시 눌러 보세요.");
+  };
+  try{navigator.clipboard.writeText(text).then(done,fallback)}catch(e){fallback()}
+});
+
+/* 탭 */
+function setTab(t){
+  state.tab=t;
+  ["character","background"].forEach(x=>{
+    $("#tab-"+x).setAttribute("aria-selected",x===t?"true":"false");
+    $("#panel-"+x).hidden=x!==t;
+  });
+  document.body.classList.toggle("tab-bg",t==="background");
+  const w=t==="background"?"장소":"인물";$("#pledge-chat").textContent=`같은 ${josa(w,"은","는")} 하나의 대화창에서 생성하고, 새로운 ${josa(w,"은","는")} 새 대화창을 열어 생성해야 합니다.`;
+  renderPresets();
+  try{history.replaceState(null,"","#"+t)}catch(e){}
+  update();
+}
+$("#tab-character").addEventListener("click",()=>setTab("character"));
+$("#tab-background").addEventListener("click",()=>setTab("background"));
+document.querySelector(".tabs").addEventListener("keydown",e=>{if(e.key==="ArrowRight"||e.key==="ArrowLeft"){const n=state.tab==="character"?"background":"character";setTab(n);$("#tab-"+n).focus()}});
+
+/* 붙여넣기 금지: 묘사 칸은 직접 쓰기 */
+const isField=el=>el&&(el.tagName==="TEXTAREA"||(el.tagName==="INPUT"&&/^(text|search|)$/.test(el.type||"")));
+const NO_PASTE="붙여넣기는 할 수 없습니다. 묘사는 직접 쓰세요.";
+/* 붙여넣기 안내는 화면 가운데 팝업으로, X를 눌러야 닫힘 */
+const pasteModal=$("#paste-modal");let pasteFrom=null;
+function noPaste(el){if(el&&el.blur){pasteFrom=el;el.blur()}pasteModal.hidden=false;$("#paste-close").focus()}
+$("#paste-close").addEventListener("click",()=>{pasteModal.hidden=true;if(pasteFrom&&pasteFrom.isConnected)pasteFrom.focus({preventScroll:true});pasteFrom=null});
+const prevVal=new WeakMap();
+document.addEventListener("focusin",e=>{if(isField(e.target))prevVal.set(e.target,e.target.value)},true);
+["paste","drop"].forEach(ev=>document.addEventListener(ev,e=>{if(isField(e.target)){e.preventDefault();e.stopImmediatePropagation();noPaste(e.target)}},true));
+document.addEventListener("beforeinput",e=>{if(isField(e.target)&&/^insertFrom(Paste|Drop|Yank|PasteAsQuotation)/.test(e.inputType||"")){e.preventDefault();e.stopImmediatePropagation();noPaste(e.target)}},true);
+document.addEventListener("input",e=>{
+  const el=e.target;if(!isField(el))return;
+  const before=prevVal.has(el)?prevVal.get(el):"";
+  /* 모바일 키보드의 클립보드 버튼처럼 한 번에 긴 글이 들어오면 되돌리기 */
+  if(!e.isComposing&&e.inputType!=="insertCompositionText"&&el.value.length-before.length>15){
+    el.value=before;e.stopImmediatePropagation();noPaste(el);return;
+  }
+  prevVal.set(el,el.value);
+},true);
+
+/* 프롬프트 미리보기는 긁어서 복사할 수 없음: '프롬프트 복사' 버튼으로만 복사 */
+let copyAllowed=false;
+const slipEl=$("#slip");
+const inSlip=sel=>{try{return !!sel&&sel.rangeCount>0&&(sel.containsNode(slipEl,true)||slipEl.contains(sel.anchorNode)||slipEl.contains(sel.focusNode))}catch(e){return false}};
+["copy","cut"].forEach(ev=>document.addEventListener(ev,e=>{if(copyAllowed)return;if(slipEl.contains(e.target)||inSlip(getSelection())){e.preventDefault();toast("미리보기는 복사할 수 없습니다. 칸을 다 채운 뒤 '프롬프트 복사' 버튼을 누르세요.")}},true));
+["contextmenu","dragstart","selectstart"].forEach(ev=>slipEl.addEventListener(ev,e=>e.preventDefault()));
+/* 휴대폰 예시: 단계별로 누르는 장면을 차례대로 재생 */
+function playPhone(d){
+  const gen=(d._gen=(d._gen||0)+1);
+  const steps=JSON.parse(d.dataset.steps), init=(d.dataset.init||"").split(" ").filter(Boolean);
+  const cur=d.querySelector(".pcur"), ring=d.querySelector(".pring"), toastEl=d.querySelector(".ptoast,.toast.js");
+  const alive=()=>d._gen===gen&&d.offsetParent!==null;
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  const layer=(n,on)=>{ if(n==="scrolled"){d.querySelectorAll(".ios").forEach(e=>e.classList.toggle("scrolled",on));return}
+    d.querySelectorAll('[data-layer="'+n+'"]').forEach(e=>e.classList.toggle("on",on))};
+  const pos=el=>{const R=d.getBoundingClientRect(),r=el.getBoundingClientRect();return [(r.left+r.width/2-R.left)/R.width*100,(r.top+r.height/2-R.top)/R.height*100]};
+  const move=(x,y)=>{cur.style.left=x+"%";cur.style.top=y+"%"};
+  const click=(x,y)=>{ring.style.left=x+"%";ring.style.top=y+"%";ring.classList.remove("go");void ring.offsetWidth;ring.classList.add("go")};
+  (async()=>{
+    while(alive()){
+      d.querySelectorAll("[data-layer]").forEach(e=>e.classList.remove("on"));layer("scrolled",false);init.forEach(n=>layer(n,true));if(toastEl)toastEl.classList.remove("on");
+      move(50,80);await wait(700);
+      for(const st of steps){
+        if(!alive()) return;
+        if(st.drag){move(50,85);await wait(750);if(!alive())return;move(50,55);(st.on||[]).forEach(n=>layer(n,true));await wait(1000);continue}
+        const t=d.querySelector('[data-t="'+st.t+'"]'); if(!t) continue;
+        const [x,y]=pos(t);move(x,y);await wait(800);if(!alive())return;
+        click(x,y);await wait(280);
+        (st.off||[]).forEach(n=>layer(n,false));(st.on||[]).forEach(n=>layer(n,true));
+        if(st.toast&&toastEl) toastEl.classList.add("on");
+        await wait(st.toast||st.hold?2400:900);
+      }
+      await wait(600);
+    }
+  })();
+}
+const shareModal=$("#share-modal");
+const closeShare=()=>{shareModal.hidden=true;$("#btn-share").focus()};
+const setAi=i=>{[0,1,2].forEach(j=>{$("#ai-tab-"+j).setAttribute("aria-selected",j===i?"true":"false");$("#ai-panel-"+j).hidden=j!==i});
+  document.querySelectorAll("#ai-panel-"+i+" .demo").forEach(d=>{
+  const R=d.getBoundingClientRect();
+  d.querySelectorAll("[data-tg]").forEach(t=>{const r=t.getBoundingClientRect(),k=t.dataset.tg;
+    d.style.setProperty("--"+k+"x",((r.left+r.width/2-R.left)/R.width*100).toFixed(1)+"%");
+    d.style.setProperty("--"+k+"y",((r.top+r.height/2-R.top)/R.height*100).toFixed(1)+"%")});
+  d.querySelectorAll("*").forEach(e=>{e.style.animation="none";void e.offsetWidth;e.style.animation=""})});
+  document.querySelectorAll("#ai-panel-"+i+" [data-steps]").forEach(d=>requestAnimationFrame(()=>playPhone(d)))};
+[0,1,2].forEach(j=>$("#ai-tab-"+j).addEventListener("click",()=>setAi(j)));
+$("#btn-share").addEventListener("click",()=>{shareModal.hidden=false;setAi(0);$("#share-close").focus()});
+$("#share-close").addEventListener("click",closeShare);
+shareModal.addEventListener("click",e=>{if(e.target===shareModal)closeShare()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!shareModal.hidden)closeShare()});
+const shotsModal=$("#shots-modal");
+const closeShots=()=>{shotsModal.hidden=true;$("#btn-shots").focus()};
+$("#btn-shots").addEventListener("click",()=>{shotsModal.hidden=false;$("#shots-close").focus()});
+$("#shots-close").addEventListener("click",closeShots);
+shotsModal.addEventListener("click",e=>{if(e.target===shotsModal)closeShots()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!shotsModal.hidden)closeShots()});
+
+document.querySelectorAll("[data-pledge]").forEach(cb=>{const k="pledge"+cb.dataset.pledge;cb.checked=!!store.get(k,false);cb.addEventListener("change",()=>store.set(k,cb.checked))});
+renderPresets();bindCh();renderPlaces();
+setTab(location.hash==="#background"?"background":"character");
+
+
+/* 7 결과 확인하기: 같은 대화창에 보낼 짧은 요청 */
+const fu={mode:null,what:[],v:{}};
+const FU={
+ character:{w:"인물",items:[
+   {k:"표정",type:"text",ph:"예: 눈물을 참으며 입술을 꼭 다문 얼굴"},
+   {k:"동작",type:"text",ph:"예: 무릎을 꿇고 장미에 물을 주는 자세"},
+   {k:"구도",type:"seg"}],
+   keep:"이 인물의 얼굴, 머리, 체형, 옷, 그림체는 그대로 두고 아래만 바꾼 이미지를 한 장 더 만들어 줘. 배경은 계속 흰 배경.",
+   note:"얼굴·옷·그림체는 그대로 두고 고른 것만 바뀝니다. 새로 만든 이미지도 엔딩 크레딧의 'AI로 생성한 이미지 목록'에 적기.",
+   fixPh:"예: 목도리를 더 길게\n머리 색을 더 밝은 금빛으로"},
+ background:{w:"장소",items:[
+   {k:"카메라 각도",type:"seg"},
+   {k:"시간과 날씨",type:"text",ph:"예: 해 질 무렵, 모래바람이 부는 날"},
+   {k:"인물 자리",type:"seg"}],
+   keep:"이 장소의 구조, 사물, 그림체는 그대로 두고 아래만 바꾼 이미지를 한 장 더 만들어 줘. 사람은 넣지 말고 가로 16:9로.",
+   note:"장소의 구조·사물·그림체는 그대로 두고 고른 것만 바뀝니다. 새로 만든 이미지도 엔딩 크레딧의 'AI로 생성한 이미지 목록'에 적기.",
+   fixPh:"예: 바오바브나무를 하나만\n하늘을 더 어둡게"}
+};
+function fuDefaults(){
+  const c=state.ch, pl=state.places[0]||{};
+  return {"샷":c.shot||"가슴 위","방향":c.dir||"정면","카메라 높이":c.height||"아이 레벨","카메라 각도":pl.angle||"아이 레벨","인물 자리":pl.spot||"없음"};
+}
+function renderFu(){
+  const F=FU[state.tab];
+  document.querySelectorAll(".fu-w").forEach(el=>el.textContent=F.w);
+  $("#fu-ox-o").textContent=`다른 ${josa(F.w,"은","는")} 새 대화창에서 만들기`;
+  $("#fu-ox-x").textContent=`이 대화창에서 다른 ${F.w} 만들기`;
+  $("#fu-like").setAttribute("aria-checked",fu.mode==="like"?"true":"false");
+  $("#fu-fix").setAttribute("aria-checked",fu.mode==="fix"?"true":"false");
+  $("#fu-like-box").hidden=fu.mode!=="like"; $("#fu-fix-box").hidden=fu.mode!=="fix"; $("#fu-out").hidden=!fu.mode;
+  $("#fu-fix-text").placeholder=F.fixPh;
+  $("#fu-like-note").textContent=F.note;
+  fu.what=fu.what.filter(k=>F.items.some(it=>it.k===k));
+  const W=$("#fu-what");
+  W.innerHTML=F.items.map((it,i)=>`<label><input type="checkbox" id="fu-w-${i}" value="${it.k}" ${fu.what.includes(it.k)?"checked":""}><span>${it.k}</span></label>`).join("");
+  W.querySelectorAll("input").forEach(inp=>inp.addEventListener("change",()=>{
+    fu.what=F.items.map(it=>it.k).filter(k=>k===inp.value?inp.checked:fu.what.includes(k));renderFuFields();fuUpdate();}));
+  renderFuFields();fuUpdate();
+}
+function renderFuFields(){
+  const F=FU[state.tab], box=$("#fu-fields"), d=fuDefaults();
+  box.innerHTML="";
+  F.items.forEach((it,i)=>{
+    if(!fu.what.includes(it.k)) return;
+    const g=document.createElement("div");g.className="fu-grp";
+    if(it.type==="text"){
+      const id="fu-t-"+i;
+      g.innerHTML=`<div class="f"><label for="${id}"></label><input type="text" id="${id}" placeholder="${it.ph}"></div>`;
+      g.querySelector("label").textContent=`바꿀 ${it.k}`;
+      const inp=g.querySelector("input");inp.value=fu.v[it.k]||"";
+      inp.addEventListener("input",()=>{fu.v[it.k]=inp.value;fuUpdate()});
+    }else if(it.k==="구도"){
+      g.innerHTML=`<b>바꿀 구도</b>`;
+      [["샷",SHOTS],["방향",DIRS],["카메라 높이",HEIGHTS]].forEach(([k,opts],j)=>{
+        if(fu.v[k]==null) fu.v[k]=d[k];
+        const fs=document.createElement("fieldset");fs.innerHTML=`<legend class="legend">${k}</legend><div class="seg"></div>`;
+        seg(fs.querySelector(".seg"),"fu-"+j,opts,fu.v[k],x=>{fu.v[k]=x;fuUpdate()});g.appendChild(fs);
+      });
+    }else{
+      const opts=it.k==="카메라 각도"?ANGLES:SPOTS;
+      if(fu.v[it.k]==null) fu.v[it.k]=d[it.k];
+      g.innerHTML=`<fieldset><legend class="legend">바꿀 ${it.k}</legend><div class="seg"></div></fieldset>`;
+      seg(g.querySelector(".seg"),"fu-s-"+i,opts,fu.v[it.k],x=>{fu.v[it.k]=x;fuUpdate()});
+    }
+    box.appendChild(g);
+  });
+}
+function fuText(){
+  const F=FU[state.tab];
+  if(fu.mode==="fix"){
+    const lines=($("#fu-fix-text").value||"").split("\n").map(x=>x.trim()).filter(Boolean);
+    if(!lines.length) return {err:"고칠 점을 쓰세요."};
+    return {text:`방금 만든 이미지에서 아래만 고쳐서 다시 만들어 줘. 나머지는 그대로 둬.\n${lines.map(x=>"- "+x).join("\n")}`};
+  }
+  if(!fu.what.length) return {err:"무엇을 바꿀지 하나 이상 고르세요."};
+  const rows=[];
+  for(const it of F.items){
+    if(!fu.what.includes(it.k)) continue;
+    if(it.type==="text"){const v=(fu.v[it.k]||"").trim(); if(!v) return {err:`바꿀 ${josa(it.k,"을","를")} 쓰세요.`}; rows.push(`- ${it.k}: ${v}`);}
+    else if(it.k==="구도") rows.push(`- 구도: ${fu.v["샷"]}, ${fu.v["방향"]}, ${fu.v["카메라 높이"]}`);
+    else if(it.k==="인물 자리") rows.push(`- 인물 자리: ${fu.v[it.k]}${fu.v[it.k]==="없음"?" (비워 두는 자리 없이 그리기)":" (그 자리는 사물 없이 비워 두기)"}`);
+    else rows.push(`- ${it.k}: ${fu.v[it.k]}`);
+  }
+  return {text:`${F.keep}\n${rows.join("\n")}`};
+}
+function fuUpdate(){
+  if(!fu.mode) return;
+  const r=fuText();
+  $("#fu-status").hidden=!r.err; if(r.err) $("#fu-status").textContent=r.err;
+  $("#fu-slip").hidden=!!r.err; $("#fu-slip").textContent=r.text||"";
+  $("#fu-copy").disabled=!!r.err;
+}
+$("#fu-like").addEventListener("click",()=>{fu.mode="like";renderFu()});
+$("#fu-fix").addEventListener("click",()=>{fu.mode="fix";renderFu()});
+$("#fu-fix-text").addEventListener("input",fuUpdate);
+$("#fu-copy").addEventListener("click",()=>{
+  const r=fuText(); if(r.err) return;
+  const done=()=>toast("복사했습니다. 지금 대화창에 붙여 넣으세요.");
+  const fallback=()=>{const ta=document.createElement("textarea");ta.value=r.text;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0;pointer-events:none";document.body.appendChild(ta);ta.select();let ok=false;copyAllowed=true;try{ok=document.execCommand("copy")}catch(e){}copyAllowed=false;ta.remove();ok?done():toast("복사하지 못했습니다. '요청 복사' 버튼을 다시 눌러 보세요.")};
+  try{navigator.clipboard.writeText(r.text).then(done,fallback)}catch(e){fallback()}
+});
+
+
+/* 복사 버튼 반짝임: 브라우저 설정(애니메이션 줄이기 등)과 상관없이 스크립트로 움직임 */
+(function(){const btn=$("#copy");let on=false;
+  function tick(ts){
+    const ready=btn.classList.contains("ready")&&btn.offsetParent!==null;
+    if(ready){
+      const p=(ts%1600)/1600, s=(1-Math.cos(p*2*Math.PI))/2;
+      const m=(getComputedStyle(btn).backgroundColor.match(/\d+(\.\d+)?/g)||[45,71,200]).slice(0,3).join(",");
+      btn.style.boxShadow=`0 0 0 ${(6*s).toFixed(1)}px rgba(${m},${(.35*s).toFixed(3)}), 0 0 ${(28*s).toFixed(1)}px ${(6*s).toFixed(1)}px rgba(${m},${(.6*s).toFixed(3)})`;
+      btn.style.filter=`brightness(${(1+.18*s).toFixed(3)})`;
+      btn.style.setProperty("--sx",(-60+190*Math.min(1,p/.6)).toFixed(1)+"%");on=true;
+    }else if(on){btn.style.boxShadow="";btn.style.filter="";btn.style.removeProperty("--sx");on=false}
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+/* 경고 팝업 닫기 */
+document.body.appendChild($("#preset-modal"));
+const closeWizMsg=()=>{$("#wiz-msg").hidden=true;const f=document.querySelector('.screen:not([hidden]) .f.missing input,.screen:not([hidden]) .f.missing textarea');if(f)f.focus({preventScroll:false})};
+$("#wiz-msg-close").addEventListener("click",closeWizMsg);$("#wiz-msg-ok").addEventListener("click",closeWizMsg);
+$("#wiz-msg").addEventListener("click",e=>{if(e.target.id==="wiz-msg")closeWizMsg()});
+$("#preset-close").addEventListener("click",()=>{$("#preset-modal").hidden=true});
+$("#preset-modal").addEventListener("click",e=>{if(e.target.id==="preset-modal")$("#preset-modal").hidden=true});
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("#wiz-msg").hidden)closeWizMsg();else if(!$("#preset-modal").hidden)$("#preset-modal").hidden=true});
+/* 단계별 화면 이동 */
+let screen=1,maxScreen=1;
+const pledgesDone=()=>[...document.querySelectorAll("[data-pledge]")].every(c=>c.checked);
+function blockMsg(n){
+  if(n===1&&!pledgesDone()) return "모든 약속에 체크해야 다음으로 넘어갈 수 있습니다.";
+  if(n===3){ if(state.preset==null) return "그림체를 하나 고르세요."; if(mismatch()) return "그림체 경고를 먼저 해결하세요. 앞에서 만든 것과 같은 그림체로 돌아가거나, 그림체를 바꾸고 모두 다시 만들기를 고릅니다."; }
+  if(n===4){ const m=missingFields(); if(m.length){showMissing=true;update();return "모든 칸을 채워야 다음으로 넘어갈 수 있습니다. 비어 있는 칸: "+m.join(", ");} }
+  return "";
+}
+function showScreen(n,noScroll){
+  screen=n;maxScreen=Math.max(maxScreen,n);document.body.dataset.screen=n;
+  if(n<4&&showMissing){showMissing=false;update();}
+  document.querySelectorAll(".screen").forEach(el=>el.hidden=+el.dataset.screen!==n);
+  const kind=state.tab==="character"?"인물":"배경";
+  document.querySelectorAll(".stepper [data-go]").forEach(b=>{const k=+b.dataset.go;
+    b.disabled=k>maxScreen;b.classList.toggle("done",k<n);
+    if(k===n) b.setAttribute("aria-current","step"); else b.removeAttribute("aria-current");
+    if(k===2) b.querySelector(".sl").textContent="만들 것 고르기";
+    if(k===4) b.querySelector(".sl").textContent=(state.tab==="character"?"인물":"장소")+" 묘사하기";});
+  $("#wiz-prev").hidden=n===1;
+  $("#wiz-next").textContent=n===1?"시작하기 →":n===5?"프롬프트 보기 →":n===6?"이미지를 수정하거나 추가 생성하려면 →":n===7?"다른 인물·장소 만들기":"다음 →";
+  if(n===7) renderFu();
+  $("#wiz-msg").hidden=true;
+  store.set("screen",{n,max:maxScreen});
+  if(!noScroll) window.scrollTo({top:0});
+}
+function goForward(target){
+  for(let k=screen;k<target;k++){if(k===3&&state.preset!=null&&mismatch()){if(k!==screen)showScreen(k);$("#preset-modal").hidden=false;return}const m=blockMsg(k);if(m){if(k!==screen)showScreen(k);$("#wiz-msg-text").textContent=m;$("#wiz-msg").hidden=false;$("#wiz-msg-ok").focus();return}}
+  showScreen(target);
+}
+$("#wiz-next").addEventListener("click",()=>{ if(screen===7){fu.mode=null;fu.what=[];fu.v={};$("#fu-fix-text").value="";
+    /* 방금 복사한 인물·장소의 칸은 비워 두고 다음 것을 새로 쓰게 함 (복사하지 않은 내용은 지우지 않음) */
+    const cur=state.tab==="character"?buildCh():buildBg();
+    if(lastCopied&&cur===lastCopied){
+      if(state.tab==="character") fillCh({kind:"사람",kinddesc:"",name:"",age:"",look:"",outfit:"",person:"",pose:"",key:""});
+      else {state.places=[blankPlace()];saveDraft();renderPlaces();update();}
+      lastCopied=null;toast(state.tab==="character"?"앞에서 만든 인물의 칸을 비웠습니다. 새 인물을 쓰고, 새 대화창에서 만드세요.":"앞에서 만든 장소의 칸을 비웠습니다. 새 장소를 쓰고, 새 대화창에서 만드세요.");
+    }
+    showScreen(2);return} goForward(screen+1); });
+$("#wiz-prev").addEventListener("click",()=>{ if(screen>1) showScreen(screen-1); });
+document.querySelectorAll(".stepper [data-go]").forEach(b=>b.addEventListener("click",()=>{const k=+b.dataset.go; if(k<=screen) showScreen(k); else goForward(k);}));
+document.querySelectorAll("[data-pledge]").forEach(cb=>cb.addEventListener("change",()=>{ if(pledgesDone()) $("#wiz-msg").hidden=true; }));
+["character","background"].forEach(t=>$("#tab-"+t).addEventListener("click",()=>{ if(screen===2) showScreen(2,true); }));
+(function(){ const sv=store.get("screen",null); if(sv&&pledgesDone()){maxScreen=Math.max(1,Math.min(7,sv.max||1));showScreen(Math.min(7,Math.max(1,sv.n||1)),true)} else showScreen(1,true); })();
+})();
+</script>
