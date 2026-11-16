@@ -250,15 +250,16 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
 .credit-sub{font-size:14px;margin:16px 0 6px;color:var(--accent)}.modal-head+.credit-sub{margin-top:0}
 .credit-list{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14.5px;line-height:1.55;word-break:keep-all}
 .credit-list ul{margin:4px 0 2px;padding-left:18px;display:grid;gap:2px;list-style:disc}
-.credit-ex{background:#0E0F14;color:#FFFFFF;border-radius:10px;padding:18px 20px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:center;word-break:keep-all}
-.credit-ex p{margin:0;font-size:13.5px;line-height:1.65}
-.credit-ex .ex-h{font-weight:800;font-size:15px;margin-bottom:6px}
-.credit-ex .ex-book{display:grid;justify-items:end;gap:8px;text-align:right}
-.credit-ex .ex-book p{font-weight:700}
-.credit-ex svg{width:120px;height:auto}
-.modal-box.credit{max-width:820px}
+.credit-ex{container-type:inline-size;background:#0E0F14;color:#FFFFFF;border-radius:10px;aspect-ratio:16/9;overflow:hidden;word-break:keep-all}
+.credit-ex .ex-in{height:100%;box-sizing:border-box;padding:5cqw 6cqw;display:grid;grid-template-columns:36fr 64fr;gap:5cqw;align-items:center}
+.credit-ex p{margin:0;font-size:2.7cqw;line-height:1.6}
+.credit-ex .ex-h{font-weight:800;font-size:3.4cqw;margin-bottom:1.2cqw}
+.credit-ex .ex-book{display:grid;justify-items:center;gap:2.5cqw;text-align:center}
+.credit-ex .ex-book p{font-weight:700;font-size:2.9cqw}
+.credit-ex svg{width:26cqw;height:auto}
+.modal-box.wide.credit{max-width:820px}
 #credit-modal .ox-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-@media (max-width:480px){.credit-ex{grid-template-columns:minmax(0,1fr)}.credit-ex .ex-book{justify-items:start;text-align:left;grid-row:1}.credit-ex svg{width:90px}#credit-modal .ox-row{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:480px){#credit-modal .ox-row{grid-template-columns:minmax(0,1fr)}}
 .modal-box.wide{max-width:680px}
 .help-btns{display:flex;gap:8px;flex-wrap:wrap}
 /* 직접 찍은 컷 O/X 목록 */
@@ -350,9 +351,9 @@ fieldset > legend.legend{padding:0;margin-bottom:8px}
     <div class="modal-box wide credit" role="dialog" aria-modal="true" aria-labelledby="credit-title">
       <div class="modal-head"><h2 id="credit-title">엔딩 크레딧 넣는 법</h2><button class="modal-x" type="button" id="credit-close" aria-label="닫기">×</button></div>
       <h3 class="credit-sub">기본 규칙</h3><ul class="credit-list"><li>영상 맨 끝에 5~10초 가량 넣기</li><li>기획안 ⑩ 준비물 표를 참고해 출처 쓰기</li></ul>
-      <h3 class="credit-sub">꼭 넣을 것</h3><ul class="credit-list"><li><b>책 표지</b>: 실물 책을 찍은 사진이나 표지 이미지</li><li><b>책 정보</b>: 『제목』, 작가, 출판사</li><li><b>출처</b><ul><li>배경 음악·효과음: 곡 이름 · 사이트 이름</li><li>인터넷 사진·영상: 사이트 이름</li></ul></li></ul>
+      <h3 class="credit-sub">엔딩 크레딧에 들어가야 하는 요소</h3><ul class="credit-list"><li><b>책 표지</b>: 실물 책을 찍은 사진이나 표지 이미지</li><li><b>책 정보</b>: 『제목』, 작가, 출판사</li><li><b>출처</b><ul><li>배경 음악·효과음: 곡 이름 · 사이트 이름</li><li>인터넷 사진·영상: 사이트 이름</li></ul></li></ul>
       <h3 class="credit-sub">예시 화면</h3>
-      <div class="credit-ex" role="img" aria-label="엔딩 크레딧 예시 화면"><div class="ex-src"><p class="ex-h">출처</p><p>배경 음악 - 「○○○」, ○○ 무료 음원 사이트</p><p>효과음 - 바람 소리, ○○ 무료 음원 사이트</p></div><div class="ex-book"><p>『긴긴밤』, 루리, 문학동네</p><svg viewBox="0 0 120 92" aria-hidden="true" focusable="false"><polygon points="8,56 8,64 68,90 68,82" fill="#F4F4F2"/><polygon points="68,82 68,90 114,58 114,50" fill="#D9DDE3"/><polygon points="8,56 68,82 114,50 54,26" fill="#8EC3EE"/><path d="M8,56 L68,82 L94,64 Q66,52 40,52 Q22,52 8,56 Z" fill="#7DB544"/><ellipse cx="62" cy="40" rx="11" ry="5" fill="#FFFFFF"/><ellipse cx="70" cy="37" rx="8" ry="4.5" fill="#FFFFFF"/></svg></div></div>
+      <div class="credit-ex" role="img" aria-label="엔딩 크레딧 예시 화면 (가로 16:9)"><div class="ex-in"><div class="ex-book"><p>『긴긴밤』, 루리, 문학동네</p><svg viewBox="0 0 120 92" aria-hidden="true" focusable="false"><polygon points="8,56 8,64 68,90 68,82" fill="#F4F4F2"/><polygon points="68,82 68,90 114,58 114,50" fill="#D9DDE3"/><polygon points="8,56 68,82 114,50 54,26" fill="#8EC3EE"/><path d="M8,56 L68,82 L94,64 Q66,52 40,52 Q22,52 8,56 Z" fill="#7DB544"/><ellipse cx="62" cy="40" rx="11" ry="5" fill="#FFFFFF"/><ellipse cx="70" cy="37" rx="8" ry="4.5" fill="#FFFFFF"/></svg></div><div class="ex-src"><p class="ex-h">출처</p><p>배경 음악 - 「○○○」, ○○ 무료 음원 사이트</p><p>효과음 - 바람 소리, 캡컷 무료 제공 효과음</p></div></div></div>
       <h3 class="credit-sub">헷갈리기 쉬운 내용</h3>
       <div class="ox"><div class="ox-row"><div class="o"><b>O</b>출처를 사이트 이름까지 적기</div><div class="x"><b>X</b>"인터넷에서 가져옴"처럼 어디인지 모르게 쓰기</div></div><div class="ox-row"><div class="o"><b>O</b>5~10초 동안 다 읽을 수 있는 글자 크기</div><div class="x"><b>X</b>글자가 작거나 너무 빨리 넘어가기</div></div><div class="ox-row"><div class="o"><b>O</b>직접 찍은 영상·손그림은 출처를 적지 않아도 됨</div><div class="x"><b>X</b>인터넷 영상을 섞고 출처 빼기</div></div></div>
     </div>
