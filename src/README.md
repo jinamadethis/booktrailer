@@ -16,4 +16,4 @@
 - `fonts/` — Paperlogy 7·8, SUIT Variable (둘 다 SIL Open Font License)
 - `tests/` — Playwright 점검 스크립트(`t41.js` 전체 흐름, `mock.js` 모의 수업, `tcopy2.js` 복사 버튼 반짝임), `genprompts.js`(채운 프롬프트 생성), `aisim.py`(AI 응답 모의 실험). 스크립트는 `site/prompt-maker.html` 경로를 쓰므로 실행 전 경로를 `build/prompt-maker.html`로 맞출 것
 
-직접 촬영 안내(`shoot/index.html`)는 글꼴을 따로 넣지 않으므로 그 파일 자체가 원본입니다.
+직접 촬영 안내(`shoot/index.html`)는 그 파일 자체가 원본입니다. 이 파일에도 Paperlogy가 쓰인 글자만 잘라 들어 있으므로, 제목·버튼 등에 새 글자를 넣으면 `src/fonts`의 원본 글꼴로 기존 글자 + 새 글자를 다시 잘라 넣어야 합니다.
